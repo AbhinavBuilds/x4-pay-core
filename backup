@@ -1,0 +1,100 @@
+#include <NimBLEDevice.h>
+struct ble_gap_conn_desc;
+
+static const char* DEVICE_NAME = "ESP32-BLE-Echo";
+
+static NimBLEUUID SERVICE_UUID("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
+static NimBLEUUID RX_CHAR_UUID("6e400002-b5a3-f393-e0a9-e50e24dcca9e"); // Write
+static NimBLEUUID TX_CHAR_UUID("6e400003-b5a3-f393-e0a9-e50e24dcca9e"); // Notify
+
+NimBLEServer* pServer = nullptr;
+NimBLECharacteristic* pTxChar = nullptr;
+NimBLEAdvertising* pAdvertising = nullptr;
+
+// ---------------- Characteristic Callbacks ----------------
+class RxCallbacks : public NimBLECharacteristicCallbacks {
+ public:
+  void onWrite(NimBLECharacteristic* ch) { handleWrite(ch); }
+  void onWrite(NimBLECharacteristic* ch, NimBLEConnInfo& /*info*/) { handleWrite(ch); }
+
+ private:
+  void handleWrite(NimBLECharacteristic* ch) {
+    std::string incoming = ch->getValue();
+    if (incoming.empty()) return;
+    std::string reply = "Message received: " + incoming;
+    if (pTxChar) {
+      pTxChar->setValue((uint8_t*)reply.data(), reply.size());
+      pTxChar->notify();   // safe even if no one subscribed
+    }
+  }
+};
+
+// ---------------- Server Callbacks ----------------
+class ServerCallbacks : public NimBLEServerCallbacks {
+ public:
+  void onConnect(NimBLEServer* /*srv*/) {
+    Serial.println("Client connected");
+    // keep advertising even when connected (for multiple centrals)
+    NimBLEDevice::startAdvertising();
+  }
+
+  void onDisconnect(NimBLEServer* /*srv*/) {
+    Serial.println("Client disconnected — restarting advertising");
+    if (pAdvertising) {
+      delay(500);  // let BLE stack settle
+      pAdvertising->start();
+      Serial.println("Advertising restarted");
+    }
+  }
+
+  // Compatibility overloads (some NimBLE versions use these)
+  void onConnect(NimBLEServer* s, NimBLEConnInfo& i) { onConnect(s); }
+  void onDisconnect(NimBLEServer* s, NimBLEConnInfo& i) { onDisconnect(s); }
+  void onConnect(NimBLEServer* s, ble_gap_conn_desc* d) { onConnect(s); }
+  void onDisconnect(NimBLEServer* s, ble_gap_conn_desc* d) { onDisconnect(s); }
+};
+
+// ---------------- Setup ----------------
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+
+  NimBLEDevice::init(DEVICE_NAME);
+  NimBLEDevice::setDeviceName(DEVICE_NAME);
+  NimBLEDevice::setPower(ESP_PWR_LVL_P7);
+  NimBLEDevice::setSecurityAuth(false, false, false);
+  NimBLEDevice::setMTU(247);
+
+  pServer = NimBLEDevice::createServer();
+  pServer->setCallbacks(new ServerCallbacks());
+
+  NimBLEService* svc = pServer->createService(SERVICE_UUID);
+
+  // TX: notify characteristic
+  pTxChar = svc->createCharacteristic(TX_CHAR_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
+
+  // RX: write characteristic
+  NimBLECharacteristic* rx = svc->createCharacteristic(
+      RX_CHAR_UUID,
+      NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_NR);
+  rx->setCallbacks(new RxCallbacks());
+
+  svc->start();
+
+  pAdvertising = NimBLEDevice::getAdvertising();
+  pAdvertising->addServiceUUID(SERVICE_UUID);
+  pAdvertising->setScanFilter(false, false);  // avoid macOS reconnection filter issue
+  pAdvertising->start();
+
+  Serial.println("BLE Echo server started and advertising.");
+}
+
+// ---------------- Loop ----------------
+void loop() {
+  // Watchdog: if advertising stops unexpectedly, restart it
+  if (pAdvertising && !pAdvertising->isAdvertising()) {
+    Serial.println("Advertising stopped unexpectedly, restarting...");
+    pAdvertising->start();
+  }
+  delay(1000);
+}
