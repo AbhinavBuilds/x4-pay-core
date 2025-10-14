@@ -1,8 +1,3 @@
-// Verifying and setteling a signed payment header manually so it can be easily be migrated to c++
-
-import { PaymentPayload, PaymentRequirements } from "x402/types";
-import { createPaymentPayload } from "./client.js";
-
 const to = "0xa78eD39F695615315458Bb066ac9a5F28Dfd65FE";
 const value = "1000000";
 const network = "base-sepolia";
@@ -91,7 +86,7 @@ const getAsset = (network: string) => {
   return asset;
 };
 
-const mockPaymentRequirements: PaymentRequirements = {
+const mockPaymentRequirements : any = {
   scheme: "exact",
   network,
   maxAmountRequired: value,
@@ -104,7 +99,7 @@ const mockPaymentRequirements: PaymentRequirements = {
   extra: { name: getAsset(network).usdcName, version: "2" },
 };
 
-const verify = async (decodedSignedPayload: PaymentPayload) => {
+const verify = async (decodedSignedPayload: any) => {
   const url = DEFAULT_FACILITATOR_URL;
 
   let headers = { "Content-Type": "application/json" };
@@ -129,7 +124,7 @@ const verify = async (decodedSignedPayload: PaymentPayload) => {
   }
 };
 
-const settle = async (decodedSignedPayload: PaymentPayload) => {
+const settle = async (decodedSignedPayload: any) => {
   const url = DEFAULT_FACILITATOR_URL;
   let headers = { "Content-Type": "application/json" };
 
@@ -153,13 +148,11 @@ const settle = async (decodedSignedPayload: PaymentPayload) => {
   return data;
 };
 
-const  managepayment = async () => {
-  const decodedSignedPayload = await createPaymentPayload(
-    mockPaymentRequirements
-  );
+async function main() {
+  const decodedSignedPayload = ""
 
   await verify(decodedSignedPayload);
   await settle(decodedSignedPayload);
 }
 
-
+main();
