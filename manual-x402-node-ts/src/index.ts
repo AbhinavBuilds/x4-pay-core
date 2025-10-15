@@ -104,6 +104,7 @@ const mockPaymentRequirements: PaymentRequirements = {
   extra: { name: getAsset(network).usdcName, version: "2" },
 };
 
+
 const verify = async (decodedSignedPayload: PaymentPayload) => {
   const url = DEFAULT_FACILITATOR_URL;
 
@@ -153,13 +154,11 @@ const settle = async (decodedSignedPayload: PaymentPayload) => {
   return data;
 };
 
-const  managepayment = async () => {
+const managepayment = async () => {
   const decodedSignedPayload = await createPaymentPayload(
     mockPaymentRequirements
   );
 
   await verify(decodedSignedPayload);
   await settle(decodedSignedPayload);
-}
-
-
+};
