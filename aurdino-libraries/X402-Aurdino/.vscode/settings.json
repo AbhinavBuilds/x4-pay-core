@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "map": "cpp",
+        "ostream": "cpp",
+        "print": "cpp"
+    }
+}

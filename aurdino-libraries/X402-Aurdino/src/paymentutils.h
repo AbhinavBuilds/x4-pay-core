@@ -13,6 +13,9 @@ String escapeJsonString(const String& str);
 // Helper function to extract value from JSON string
 String extractJsonValue(const String& json, const String& key);
 
+// Helper function to parse payment JSON string into PaymentPayload struct
+PaymentPayload parsePaymentString(const String& paymentJsonStr);
+
 // Helper function to create payment request JSON payload
 String createPaymentRequestJson(const PaymentPayload &decodedSignedPayload, const String &paymentRequirements);
 

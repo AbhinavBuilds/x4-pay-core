@@ -18,11 +18,11 @@ const String colors[] = { "red", "green", "blue", "orange", "neon" };
 X402Ble* x402ble;
 
 // WiFi credentials - UPDATE THESE!
-// const char* ssid = "Krishna cottage B block 2nd";
-// const char* password = "India@123";
+const char* ssid = "Krishna cottage B block 2nd";
+const char* password = "India@123";
 
-const char* ssid = "Azure";
-const char* password = "hello123";
+// const char* ssid = "Azure";
+// const char* password = "hello123";
 
 void setup() {
   Serial.begin(9600);

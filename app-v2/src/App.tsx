@@ -7,6 +7,7 @@ import {
   createPaymentPayload,
 } from "./utils/x402-utils";
 import { useWalletClient } from "wagmi";
+import { chunkString } from "./utils/communication-utils";
 
 function App() {
   const { data: walletClient } = useWalletClient();
@@ -31,12 +32,27 @@ function App() {
       return;
     }
     try {
+      console.log(paymentRequirements)
       const payload = await createPaymentPayload(
         address,
         walletClient,
         paymentRequirements
       );
-      console.log("Payment Payload:", payload);
+      const chunks = chunkString(JSON.stringify(payload), 150);
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        let data = "";
+
+        if (i == 0) {
+          data = `X-PAYMENT:START${chunk}`;
+        } else if (i == chunks.length - 1) {
+          data = `X-PAYMENT:END${chunk}`;
+        } else {
+          data = `X-PAYMENT${chunk}`;
+        }
+        sendData(data);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
     } catch (error) {
       console.error("Error creating payment payload:", error);
       alert("Failed to create payment payload. Check console for details.");
@@ -47,6 +63,7 @@ function App() {
     const value = event.target.value;
     const decoder = new TextDecoder("utf-8");
     const text = decoder.decode(value);
+    console.log("Received Notification:", text);
     if (text.startsWith("402://")) {
       const {
         network,
@@ -57,13 +74,12 @@ function App() {
         payTo: string;
         price: string;
       } = JSON.parse(text.slice(6));
-      console.log({ network, payTo, price });
       const _paymentrequirements = buildPaymentRequirements(
         network,
         payTo,
         price
       );
-      console.log(_paymentrequirements);
+
       setPaymentRequirements(_paymentrequirements);
     } else if (text.startsWith("LOGO://")) {
       const logoData = text.slice(7);
@@ -75,7 +91,6 @@ function App() {
       const descData = text.slice(7);
       setDescription(descData);
     } else if (text.startsWith("CONFIG://")) {
-      console.log("_optionsData", text);
       const _optionsData = JSON.parse(text.slice(9));
       if (_optionsData.frequency) setFrequency(_optionsData.frequency);
       if (_optionsData.allowCustomtext)

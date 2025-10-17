@@ -5,7 +5,8 @@
 #include <map>
 #include <string>
 
-static const char *DEFAULT_FACILITATOR_URL = "https://x402.org/facilitator";
+// Use canonical host with www to avoid HTTP 308 redirects
+static const char *DEFAULT_FACILITATOR_URL = "https://www.x402.org/facilitator";
 
 struct AssetInfo
 {
@@ -32,6 +33,12 @@ struct PaymentPayload
 {
     String x402Version;
     String payloadJson;
+    
+    // Default constructor
+    PaymentPayload() : x402Version(""), payloadJson("") {}
+    
+    // Constructor from JSON string - automatically parses it correctly
+    PaymentPayload(const String& paymentJsonStr);
 };
 
 const std::map<String, uint32_t> EvmNetworkToChainId = {
@@ -66,7 +73,12 @@ String buildRequirementsJson(const String &network, const String &payTo, const S
 
 String buildDefaultPaymentRementsJson(const String network, const String payTo, const String maxAmountRequired, const String resource, const String description = "");
 
+// Verify payment using PaymentPayload struct
 bool verifyPayment(const PaymentPayload &decodedSignedPayload, const String &paymentRequirements, const String &customHeaders = "");
+
+// Verify payment using raw JSON strings (convenience method)
+bool verifyPayment(const String &paymentPayloadJson, const String &paymentRequirements, const String &customHeaders = "");
+
 String settlePayment(const PaymentPayload &decodedSignedPayload, const String &paymentRequirements, const String &customHeaders = "");
 
 #endif

@@ -1,0 +1,67 @@
+#######################################
+# X402 Arduino Library - Syntax Coloring
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+PaymentPayload	KEYWORD1
+PaymentRequirements	KEYWORD1
+AssetInfo	KEYWORD1
+HttpResponse	KEYWORD1
+MemoryGuard	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+verifyPayment	KEYWORD2
+settlePayment	KEYWORD2
+buildRequirementsJson	KEYWORD2
+buildDefaultPaymentRementsJson	KEYWORD2
+getAssetForNetwork	KEYWORD2
+escapeJsonString	KEYWORD2
+extractJsonValue	KEYWORD2
+createPaymentRequestJson	KEYWORD2
+makePaymentApiCall	KEYWORD2
+postJson	KEYWORD2
+
+# Memory Utilities
+getFreeHeap	KEYWORD2
+getMinFreeHeap	KEYWORD2
+getMaxAllocHeap	KEYWORD2
+getHeapFragmentation	KEYWORD2
+printMemoryStats	KEYWORD2
+getFreeStack	KEYWORD2
+printStackInfo	KEYWORD2
+
+# Stack Monitoring Utilities
+logStack	KEYWORD2
+getStackHighWaterMark	KEYWORD2
+isStackSafe	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+DEFAULT_FACILITATOR_URL	LITERAL1
+EvmNetworkToChainId	LITERAL1
+EvmUSDC	LITERAL1
+
+# Stack Size Constants
+STACK_SIZE_SIMPLE	LITERAL1
+STACK_SIZE_HTTP	LITERAL1
+STACK_SIZE_JSON	LITERAL1
+STACK_SIZE_HEAVY	LITERAL1
+
+#######################################
+# Preprocessor Directives
+#######################################
+
+DEBUG_HTTP	LITERAL1
+DEBUG_MEMORY	LITERAL1
+DEBUG_STACK	LITERAL1
+MEMORY_CHECKPOINT	LITERAL1
+STACK_CHECKPOINT	LITERAL1
+STACK_CHECK_SAFE	LITERAL1

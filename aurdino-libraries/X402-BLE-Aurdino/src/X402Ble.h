@@ -7,6 +7,9 @@
 
 #include "X402Aurdino.h"
 
+// Forward declaration to avoid circular include
+class PaymentVerifyWorker;
+
 class X402Ble
 {
 public:
@@ -18,7 +21,15 @@ public:
                      const String &description = "",
                      const String &banner = "");
 
+    // Destructor for proper cleanup
+    ~X402Ble();
+
     void begin();
+    void cleanup(); // Manual cleanup method
+    
+    // Memory monitoring functions
+    void printMemoryUsage() const;
+    size_t getPaymentPayloadSize() const { return paymentPayload_.length(); }
 
     String paymentRequirements;
 
@@ -39,6 +50,11 @@ public:
     uint32_t getFrequency() const { return frequency_; }
     const std::vector<String> &getOptions() const { return options_; }
     bool isCustomContentAllowed() const { return allowCustomContent_; }
+    String getPaymentPayload() const { return paymentPayload_; }
+
+    // Payment payload assembly (used by RxCallbacks)
+    void setPaymentPayload(const String &payload) { paymentPayload_ = payload; }
+    void clearPaymentPayload() { paymentPayload_ = ""; }
 
     // BLE UUIDs
     static const char *SERVICE_UUID;
@@ -58,6 +74,7 @@ private:
     uint32_t frequency_;                 // 0 = not set
     std::vector<String> options_;        // empty by default
     bool allowCustomContent_;            // false by default
+    String paymentPayload_;              // assembled from chunks
 
     NimBLEServer *pServer;
     NimBLEService *pService;

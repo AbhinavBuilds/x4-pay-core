@@ -104,16 +104,23 @@ const mockPaymentRequirements: PaymentRequirements = {
   extra: { name: getAsset(network).usdcName, version: "2" },
 };
 
-
 const verify = async (decodedSignedPayload: PaymentPayload) => {
   const url = DEFAULT_FACILITATOR_URL;
 
   let headers = { "Content-Type": "application/json" };
-
+  console.log("========================");
+  console.log(
+    JSON.stringify({
+      x402Version: decodedSignedPayload.x402Version,
+      paymentPayload: decodedSignedPayload,
+      paymentRequirements: mockPaymentRequirements,
+    })
+  );
+  console.log("========================");
   const res = await fetch(`${url}/verify`, {
     method: "POST",
     headers,
-    body: JSON.stringify({
+body : JSON.stringify({
       x402Version: decodedSignedPayload.x402Version,
       paymentPayload: decodedSignedPayload,
       paymentRequirements: mockPaymentRequirements,
@@ -162,3 +169,5 @@ const managepayment = async () => {
   await verify(decodedSignedPayload);
   await settle(decodedSignedPayload);
 };
+
+managepayment();
