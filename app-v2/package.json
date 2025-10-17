@@ -1,5 +1,5 @@
 {
-  "name": "custom-esp32-ble-library",
+  "name": "app-v2",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,6 +13,7 @@
     "@coinbase/x402": "^0.6.6",
     "@rainbow-me/rainbowkit": "^2.2.9",
     "@tailwindcss/vite": "^4.1.14",
+    "lucide-react": "^0.546.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwindcss": "^4.1.14"
