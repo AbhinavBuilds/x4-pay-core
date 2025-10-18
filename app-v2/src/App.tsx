@@ -26,39 +26,6 @@ function App() {
 
   const g = useRef<GattRefs>({});
 
-  const handlePayNow = async (address: `0x${string}` | undefined) => {
-    if (!paymentRequirements) {
-      alert("Payment requirements not set.");
-      return;
-    }
-    try {
-      console.log(paymentRequirements)
-      const payload = await createPaymentPayload(
-        address,
-        walletClient,
-        paymentRequirements
-      );
-      const chunks = chunkString(JSON.stringify(payload), 150);
-      for (let i = 0; i < chunks.length; i++) {
-        const chunk = chunks[i];
-        let data = "";
-
-        if (i == 0) {
-          data = `X-PAYMENT:START${chunk}`;
-        } else if (i == chunks.length - 1) {
-          data = `X-PAYMENT:END${chunk}`;
-        } else {
-          data = `X-PAYMENT${chunk}`;
-        }
-        sendData(data);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-    } catch (error) {
-      console.error("Error creating payment payload:", error);
-      alert("Failed to create payment payload. Check console for details.");
-    }
-  };
-
   const onNotification = (event: any) => {
     const value = event.target.value;
     const decoder = new TextDecoder("utf-8");
@@ -98,6 +65,85 @@ function App() {
     } else if (text.startsWith("OPTIONS://")) {
       const _optionsData = text.slice(10);
       setOptions(_optionsData.split(","));
+    }
+  };
+
+  const getPrice = async (options: string[], customizedtext: string) => {
+    const completeChunks = `${
+      customizedtext.length > 0 ? customizedtext : '""'
+    }--${options.length > 0 ? "[" + options.join(",") + "]" : "[]"}`;
+
+    console.log("completeChunks", completeChunks);
+
+    const chunks = chunkString(completeChunks, 150);
+
+    if (chunks.length == 1) {
+      // divide completechunks string in two halves in two different strings
+      const chunk1 = completeChunks.slice(
+        0,
+        Math.ceil(completeChunks.length / 2)
+      );
+      const chunk2 = completeChunks.slice(Math.ceil(completeChunks.length / 2));
+      await sendData(`[PRICE]:START${chunk1}`);
+      await sendData(`[PRICE]:END${chunk2}`);
+      return;
+    }
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i];
+      let data = "";
+
+      if (i == 0) {
+        data = `[PRICE]:START${chunk}`;
+      } else if (i == chunks.length - 1) {
+        data = `[PRICE]:END${chunk}`;
+      } else {
+        data = `[PRICE]:${chunk}`;
+      }
+      console.log("data", data);
+      sendData(data);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  };
+
+  const handlePayNow = async (
+    address: `0x${string}` | undefined,
+    options: string[],
+    customizedtext: string
+  ) => {
+    if (!paymentRequirements) {
+      await getPrice(options, customizedtext);
+      return;
+    }
+    try {
+      const payload = await createPaymentPayload(
+        address,
+        walletClient,
+        paymentRequirements
+      );
+      const completeChunks = `${JSON.stringify(payload)}--${
+        customizedtext.length > 0 ? customizedtext : '""'
+      }--${options.length > 0 ? "[" + options.join(",") + "]" : "[]"}`;
+
+      console.log("completeChunks", completeChunks);
+
+      const chunks = chunkString(completeChunks, 150);
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        let data = "";
+
+        if (i == 0) {
+          data = `X-PAYMENT:START${chunk}`;
+        } else if (i == chunks.length - 1) {
+          data = `X-PAYMENT:END${chunk}`;
+        } else {
+          data = `X-PAYMENT${chunk}`;
+        }
+        sendData(data);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    } catch (error) {
+      console.error("Error creating payment payload:", error);
+      alert("Failed to create payment payload. Check console for details.");
     }
   };
 
@@ -150,7 +196,7 @@ function App() {
   };
 
   const fetchAllData = async () => {
-    await sendData("x");
+    // await sendData("x");
     await sendData("[LOGO]");
     await sendData("[BANNER]");
     await sendData("[DESC]");

@@ -18,49 +18,19 @@ const DeviceWindow = ({
   logo: string | null;
   banner: string | null;
   description: string | null;
-  handlePayNow: (address: `0x${string}` | undefined) => void;
+  handlePayNow: (
+    address: `0x${string}` | undefined,
+    options: string[],
+    customizedtext: string
+  ) => void;
   frequency: number | null;
   allowCustomtext: boolean;
   options: string[];
   paymentRequirements: PaymentRequirements | null;
 }) => {
-  console.log({
-    frequency,
-    allowCustomtext,
-    options,
-  });
-
   const { address, isConnected } = useAccount();
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [customText, setCustomText] = useState<string>("");
-
-  const formatDollarsFromMicros = (amountStr: string) => {
-    try {
-      const micros = BigInt(amountStr);
-      const ONE_DOLLAR = 1_000_000n; // 6 decimals
-      const ONE_CENT_IN_MICROS = 10_000n;
-
-      let dollars = micros / ONE_DOLLAR;
-      let cents = (micros % ONE_DOLLAR + ONE_CENT_IN_MICROS / 2n) / ONE_CENT_IN_MICROS; // round to nearest cent
-
-      if (cents === 100n) {
-        dollars += 1n;
-        cents = 0n;
-      }
-
-      if (cents === 0n) return `$${dollars.toString()}`;
-      const centsStr = cents.toString().padStart(2, "0");
-      return `$${dollars.toString()}.${centsStr}`;
-    } catch {
-      return `$${amountStr}`; // fallback
-    }
-  };
-
-  const payLabel = paymentRequirements?.maxAmountRequired
-    ? `Pay $${formatDollarsFromMicros(paymentRequirements.maxAmountRequired)}${
-        frequency ? ` every ${frequency} seconds` : ""
-      }`
-    : "Pay Now";
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
@@ -122,12 +92,18 @@ const DeviceWindow = ({
           <div className="space-y-2">
             <div className="max-h-56 overflow-y-auto pr-1 space-y-2">
               {options.map((opt) => {
-                const selected = selectedOption === opt;
+                const selected = selectedOptions.includes(opt);
                 return (
                   <button
                     key={opt}
                     type="button"
-                    onClick={() => setSelectedOption(opt)}
+                    onClick={() =>
+                      setSelectedOptions((prev) =>
+                        prev.includes(opt)
+                          ? prev.filter((o) => o !== opt)
+                          : [...prev, opt]
+                      )
+                    }
                     className={
                       `w-full text-left px-3 py-3 rounded-md text-sm border transition-colors ` +
                       (selected
@@ -153,10 +129,10 @@ const DeviceWindow = ({
             </div>
           ) : (
             <button
-              onClick={() => handlePayNow(address)}
+              onClick={() => handlePayNow(address, selectedOptions, customText)}
               className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-4 rounded-lg transition-colors"
             >
-              {payLabel}
+              Pay now
             </button>
           )}
         </div>

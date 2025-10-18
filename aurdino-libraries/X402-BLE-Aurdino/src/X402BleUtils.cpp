@@ -50,3 +50,48 @@ bool assemblePaymentChunk(const String &chunk, String &paymentPayload)
     // Not a payment chunk
     return false;
 }
+
+// Memory-optimized price request chunk assembly
+// Frontend sends: "[PRICE]:START<data>", "[PRICE]:<data>", ..., "[PRICE]:END<data>"
+// Returns true when complete (END received), false while still assembling
+bool assemblePriceRequestChunk(const String &chunk, String &priceRequestPayload)
+{
+    const char* chunk_ptr = chunk.c_str();
+    
+    Serial.print("[DEBUG assemblePriceRequestChunk] Received chunk: ");
+    Serial.println(chunk_ptr);
+    
+    if (strncmp(chunk_ptr, "[PRICE]:START", 13) == 0)
+    {
+        // Start of new price request - clear existing and start fresh
+        Serial.println("[DEBUG assemblePriceRequestChunk] START detected");
+        priceRequestPayload = "";
+        priceRequestPayload.reserve(512); // Pre-allocate expected payload size
+        priceRequestPayload += (chunk_ptr + 13); // Skip "[PRICE]:START"
+        Serial.print("[DEBUG assemblePriceRequestChunk] Payload after START: ");
+        Serial.println(priceRequestPayload);
+        return false; // Not complete yet
+    }
+    else if (strncmp(chunk_ptr, "[PRICE]:END", 11) == 0)
+    {
+        // End of price request - append final chunk
+        Serial.println("[DEBUG assemblePriceRequestChunk] END detected");
+        priceRequestPayload += (chunk_ptr + 11); // Skip "[PRICE]:END"
+        Serial.print("[DEBUG assemblePriceRequestChunk] Final payload: ");
+        Serial.println(priceRequestPayload);
+        return true; // Assembly complete
+    }
+    else if (strncmp(chunk_ptr, "[PRICE]:", 8) == 0)
+    {
+        // Middle chunk - append data efficiently
+        Serial.println("[DEBUG assemblePriceRequestChunk] Middle chunk detected");
+        priceRequestPayload += (chunk_ptr + 8); // Skip "[PRICE]:"
+        Serial.print("[DEBUG assemblePriceRequestChunk] Payload so far: ");
+        Serial.println(priceRequestPayload);
+        return false; // Not complete yet
+    }
+    
+    // Not a price request chunk
+    Serial.println("[DEBUG assemblePriceRequestChunk] Not recognized as price chunk");
+    return false;
+}

@@ -84,20 +84,12 @@ String extractJsonValue(const String& json, const String& key) {
 
 // Parse a complete payment JSON string into PaymentPayload struct
 PaymentPayload parsePaymentString(const String& paymentJsonStr) {
-    Serial.println("\n========== parsePaymentString DEBUG ==========");
-    Serial.print("INPUT paymentJsonStr length: ");
-    Serial.println(paymentJsonStr.length());
-    Serial.print("INPUT paymentJsonStr (first 100 chars): [");
-    Serial.print(paymentJsonStr.substring(0, min(100, (int)paymentJsonStr.length())));
-    Serial.println("...]");
+
     
     PaymentPayload payload;
     
     // Extract x402Version from the payment JSON (as number, not quoted)
     String versionStr = extractJsonValue(paymentJsonStr, "x402Version");
-    Serial.print("Extracted versionStr: [");
-    Serial.print(versionStr);
-    Serial.println("]");
     
     if (versionStr.length() > 0) {
         payload.x402Version = versionStr;  // Keep as-is (number string like "1")
@@ -108,32 +100,13 @@ PaymentPayload parsePaymentString(const String& paymentJsonStr) {
     // The payloadJson should be the entire payment object
     // This includes: x402Version, scheme, network, payload
     payload.payloadJson = paymentJsonStr;
-    
-    Serial.println("\nOUTPUT PaymentPayload:");
-    Serial.print("  payload.x402Version: [");
-    Serial.print(payload.x402Version);
-    Serial.println("]");
-    Serial.print("  payload.payloadJson length: ");
-    Serial.println(payload.payloadJson.length());
-    Serial.print("  payload.payloadJson (first 100 chars): [");
-    Serial.print(payload.payloadJson.substring(0, min(100, (int)payload.payloadJson.length())));
-    Serial.println("...]");
-    Serial.println("==============================================\n");
+
     
     return payload;
 }
 
 String createPaymentRequestJson(const PaymentPayload &decodedSignedPayload, const String &paymentRequirements)
 {
-    Serial.println("\n========== createPaymentRequestJson DEBUG ==========");
-    Serial.print("INPUT decodedSignedPayload.x402Version: [");
-    Serial.print(decodedSignedPayload.x402Version);
-    Serial.println("]");
-    Serial.print("INPUT decodedSignedPayload.payloadJson length: ");
-    Serial.println(decodedSignedPayload.payloadJson.length());
-    Serial.print("INPUT decodedSignedPayload.payloadJson (first 100 chars): [");
-    Serial.print(decodedSignedPayload.payloadJson.substring(0, min(100, (int)decodedSignedPayload.payloadJson.length())));
-    Serial.println("...]");
     
     // AUTO-FIX: Detect if user swapped the fields
     String actualVersion;
@@ -141,10 +114,7 @@ String createPaymentRequestJson(const PaymentPayload &decodedSignedPayload, cons
     
     if (decodedSignedPayload.payloadJson.length() == 0 && decodedSignedPayload.x402Version.length() > 10) {
         // User put entire JSON in x402Version field (common mistake)
-        Serial.println("\n⚠️  DETECTED SWAPPED FIELDS - AUTO-CORRECTING!");
-        Serial.println("   x402Version contains full JSON (should be just version number)");
-        Serial.println("   payloadJson is empty (should contain full JSON)");
-        Serial.println("   Automatically fixing...\n");
+        
         
         actualPayloadJson = decodedSignedPayload.x402Version;  // Full JSON is here
         actualVersion = extractJsonValue(actualPayloadJson, "x402Version");  // Extract version
@@ -153,11 +123,7 @@ String createPaymentRequestJson(const PaymentPayload &decodedSignedPayload, cons
             actualVersion = "1";
         }
         
-        Serial.print("   ✅ Corrected x402Version: [");
-        Serial.print(actualVersion);
-        Serial.println("]");
-        Serial.print("   ✅ Corrected payloadJson length: ");
-        Serial.println(actualPayloadJson.length());
+        
     } else {
         // Fields are correct
         actualVersion = decodedSignedPayload.x402Version;
@@ -168,31 +134,14 @@ String createPaymentRequestJson(const PaymentPayload &decodedSignedPayload, cons
     String json;
     json.reserve(128 + actualPayloadJson.length() + paymentRequirements.length());
     
-    // Build the correct structure: {"x402Version":1,"paymentPayload":{...},"paymentRequirements":{...}}
-    // Root x402Version (number - NOT quoted)
-    Serial.println("\nBuilding JSON:");
-    Serial.println("Step 1: Adding x402Version to root");
+    
     json = "{\"x402Version\":";
     json += actualVersion;  // Add as unquoted number
-    Serial.print("  Result: ");
-    Serial.println(json);
-    
-    // paymentPayload (complete payment object with x402Version, scheme, network, payload)
-    Serial.println("Step 2: Adding paymentPayload");
     json += ",\"paymentPayload\":";
     json += actualPayloadJson;
-    Serial.print("  Result (first 150 chars): ");
-    Serial.println(json.substring(0, min(150, (int)json.length())));
-    
-    // paymentRequirements
-    Serial.println("Step 3: Adding paymentRequirements");
     json += ",\"paymentRequirements\":";
     json += paymentRequirements;
     json += "}";
-    
-    Serial.println("\n========== FINAL JSON (first 300 chars) ==========");
-    Serial.println(json.substring(0, min(300, (int)json.length())));
-    Serial.println("====================================================\n");
     
     return json;
 }

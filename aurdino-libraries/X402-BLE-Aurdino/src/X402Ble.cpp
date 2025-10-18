@@ -27,6 +27,17 @@ X402Ble::X402Ble(const String &device_name,
     
     // Initialize payment payload with reasonable capacity
     paymentPayload_ = "";
+    // Initialize last payment state
+    lastPaid_ = false;
+    lastTransactionhash_ = "";
+    lastPayer_ = "";
+    // Initialize user selection/context
+    userSelectedOptions_.reserve(8);
+    userCustomContext_ = "";
+    
+    // Initialize price request payload and callback
+    priceRequestPayload_ = "";
+    dynamicPriceCallback_ = nullptr;
     
     // Build payment requirements once during construction
     paymentRequirements = buildDefaultPaymentRementsJson(
@@ -68,6 +79,8 @@ void X402Ble::allowCustomised()
 
 void X402Ble::begin()
 {
+    // Set active instance for worker callbacks
+    s_active = this;
     NimBLEDevice::init(device_name_.c_str());
     NimBLEDevice::setDeviceName(device_name_.c_str());
     NimBLEDevice::setPower(ESP_PWR_LVL_P7);
@@ -135,6 +148,15 @@ void X402Ble::cleanup()
     
     // Clear payment requirements
     paymentRequirements = "";
+
+    // Clear user-provided selections/context
+    userSelectedOptions_.clear();
+    userSelectedOptions_.shrink_to_fit();
+    userCustomContext_ = "";
+    
+    // Clear price request payload and callback
+    priceRequestPayload_ = "";
+    dynamicPriceCallback_ = nullptr;
     
     // Stop BLE advertising if active
     if (pAdvertising)
@@ -190,4 +212,54 @@ void X402Ble::printMemoryUsage() const
     // ESP32 free heap
     Serial.print("Free heap: "); Serial.print(ESP.getFreeHeap()); Serial.println(" bytes");
     Serial.println("=========================");
+}
+
+// Set user selected options from C-style array
+void X402Ble::setUserSelectedOptions(const String options[], size_t count)
+{
+    userSelectedOptions_.clear();
+    if (count > 0) {
+        userSelectedOptions_.reserve(count);
+        for (size_t i = 0; i < count; ++i) {
+            userSelectedOptions_.push_back(options[i]);
+        }
+    }
+}
+
+void X402Ble::clearUserSelectedOptions()
+{
+    userSelectedOptions_.clear();
+}
+
+void X402Ble::setUserSelectedOptions(const std::vector<String>& options)
+{
+    userSelectedOptions_.clear();
+    if (!options.empty()) {
+        userSelectedOptions_.reserve(options.size());
+        for (const auto &opt : options) {
+            userSelectedOptions_.push_back(opt);
+        }
+    }
+}
+
+// Static active instance pointer
+X402Ble* X402Ble::s_active = nullptr;
+
+// Return active instance
+X402Ble* X402Ble::getActiveInstance() {
+    return s_active;
+}
+
+// Return lastPaid and reset it to false
+bool X402Ble::getStatusAndReset() {
+    bool wasPaid = lastPaid_;
+    lastPaid_ = false;
+    return wasPaid;
+}
+
+// Update last payment state
+void X402Ble::setLastPaymentState(bool paid, const String &txHash, const String &payer) {
+    lastPaid_ = paid;
+    lastTransactionhash_ = txHash;
+    lastPayer_ = payer;
 }

@@ -19,7 +19,6 @@ HttpResponse postJson(const String &url, const String &jsonPayload, const String
     // Begin HTTP connection
     if (!http.begin(url))
     {
-        Serial.println("ERROR: HTTP begin failed");
         return response;
     }
 
@@ -28,13 +27,6 @@ HttpResponse postJson(const String &url, const String &jsonPayload, const String
 
     // Default content type
     http.addHeader("Content-Type", "application/json");
-
-    // Log request
-    Serial.println("\n========== HTTP REQUEST ==========");
-    Serial.print("URL: ");
-    Serial.println(url);
-    Serial.println("Headers:");
-    Serial.println("  Content-Type: application/json");
 
     // Add custom headers if provided - Memory optimized
     if (customHeaders.length() > 0)
@@ -69,11 +61,6 @@ HttpResponse postJson(const String &url, const String &jsonPayload, const String
                 headerValue.trim();
                 http.addHeader(headerName, headerValue);
 
-                Serial.print("  ");
-                Serial.print(headerName);
-                Serial.print(": ");
-                Serial.println(headerValue);
-
                 // Free memory immediately
                 headerName = "";
                 headerValue = "";
@@ -82,11 +69,7 @@ HttpResponse postJson(const String &url, const String &jsonPayload, const String
         }
     }
 
-    Serial.print("Payload Length: ");
-    Serial.println(jsonPayload.length());
-    Serial.print("Payload: ");
-    Serial.println(jsonPayload);
-    Serial.println("==================================\n");
+
 
     // Perform POST request
     int httpResponseCode = http.POST(jsonPayload);
@@ -101,29 +84,14 @@ HttpResponse postJson(const String &url, const String &jsonPayload, const String
         response.body = http.getString();
         response.success = (httpResponseCode >= 200 && httpResponseCode < 300);
 
-        // Always log response for debugging
-        Serial.println("\n========== HTTP RESPONSE ==========");
-        Serial.print("POST to: ");
-        Serial.println(url);
-        Serial.print("Status Code: ");
-        Serial.println(httpResponseCode);
-        Serial.print("Response Body Length: ");
-        Serial.println(response.body.length());
-        Serial.print("Response Body: ");
-        Serial.println(response.body);
-        Serial.println("===================================\n");
+        
 
     }
     else
     {
         // Handle HTTP errors (connection errors, negative codes)
         response.success = false;
-        Serial.println("\n========== HTTP ERROR ==========");
-        Serial.print("ERROR: HTTP POST failed - Code: ");
-        Serial.println(httpResponseCode);
-        Serial.print("URL: ");
-        Serial.println(url);
-        Serial.println("================================\n");
+        
     }
 
     // Clean up HTTP client - This releases connection resources

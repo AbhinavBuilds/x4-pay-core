@@ -2,6 +2,8 @@
     "files.associations": {
         "map": "cpp",
         "ostream": "cpp",
-        "print": "cpp"
+        "print": "cpp",
+        "limits": "cpp",
+        "algorithm": "cpp"
     }
 }

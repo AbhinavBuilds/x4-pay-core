@@ -10,4 +10,8 @@ bool startsWithIgnoreCase(const String &s, const char *prefix);
 // Returns true when assembly is complete (END received), false if still assembling
 bool assemblePaymentChunk(const String &chunk, String &paymentPayload);
 
+// Price request chunk assembly - handles [PRICE]:START, [PRICE]:, [PRICE]:END chunks
+// Returns true when assembly is complete (END received), false if still assembling
+bool assemblePriceRequestChunk(const String &chunk, String &priceRequestPayload);
+
 #endif // X402BLE_UTILS_H
