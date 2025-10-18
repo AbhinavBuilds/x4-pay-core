@@ -14,6 +14,11 @@ class PaymentVerifyWorker;
 // Takes user selected options and custom context, returns price as String
 typedef String (*DynamicPriceCallback)(const std::vector<String>& options, const String& customContext);
 
+// OnPay callback typedef
+// Called when payment verification and settlement succeed
+// Receives selected options and custom context from the user
+typedef void (*OnPayCallback)(const std::vector<String>& options, const String& customContext);
+
 class X402Ble
 {
 public:
@@ -90,6 +95,10 @@ public:
     void setDynamicPriceCallback(DynamicPriceCallback callback) { dynamicPriceCallback_ = callback; }
     DynamicPriceCallback getDynamicPriceCallback() const { return dynamicPriceCallback_; }
 
+    // OnPay callback - called when payment succeeds
+    void setOnPay(OnPayCallback callback) { onPayCallback_ = callback; }
+    OnPayCallback getOnPayCallback() const { return onPayCallback_; }
+
     // BLE UUIDs
     static const char *SERVICE_UUID;
     static const char *TX_CHAR_UUID;
@@ -131,6 +140,9 @@ private:
     
     // Dynamic price callback function
     DynamicPriceCallback dynamicPriceCallback_;
+    
+    // OnPay callback function (called on successful payment)
+    OnPayCallback onPayCallback_;
 
     NimBLEServer *pServer;
     NimBLEService *pService;

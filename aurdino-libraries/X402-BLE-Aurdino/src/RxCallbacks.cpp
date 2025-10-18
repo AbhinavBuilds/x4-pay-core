@@ -183,7 +183,7 @@ void RxCallbacks::onWrite(NimBLECharacteristic *ch)
     else if (strncasecmp(req_cstr, "[PRICE]", 7) == 0)
     {
         // Handle [PRICE] chunked data: [PRICE]:START, [PRICE]:, [PRICE]:END
-        Serial.println("[DEBUG] [PRICE] request received");
+        
         if (pBle)
         {
             String currentPricePayload = pBle->getPriceRequestPayload();
@@ -196,11 +196,11 @@ void RxCallbacks::onWrite(NimBLECharacteristic *ch)
 
             if (isComplete)
             {
-                Serial.println("[DEBUG] [PRICE] assembly complete");
+                
                 // Parse the combined payload: customContext--[options]
                 String combined = pBle->getPriceRequestPayload();
-                Serial.print("[DEBUG] Combined payload: ");
-                Serial.println(combined);
+                
+                
                 
                 int firstSep = combined.indexOf("--");
                 String customContext;
@@ -222,10 +222,7 @@ void RxCallbacks::onWrite(NimBLECharacteristic *ch)
                 if (customContext == "\"\"")
                     customContext = "";
 
-                Serial.print("[DEBUG] Custom context: ");
-                Serial.println(customContext);
-                Serial.print("[DEBUG] Options part: ");
-                Serial.println(optionsPart);
+                
 
                 // Parse options array like [opt1,opt2]
                 std::vector<String> selectedOptions;
@@ -246,24 +243,21 @@ void RxCallbacks::onWrite(NimBLECharacteristic *ch)
                     }
                 }
 
-                Serial.print("[DEBUG] Options parsed: ");
-                Serial.println(selectedOptions.size());
+                
 
                 // Call dynamic price callback if set
                 String dynamicPrice = pBle->getPrice(); // Default to static price
-                Serial.print("[DEBUG] Callback pointer: ");
-                Serial.println(pBle->getDynamicPriceCallback() != nullptr ? "SET" : "NULL");
+                
                 
                 if (pBle->getDynamicPriceCallback() != nullptr)
                 {
-                    Serial.println("[DEBUG] Calling dynamic price callback...");
+                    
                     dynamicPrice = pBle->getDynamicPriceCallback()(selectedOptions, customContext);
-                    Serial.print("[DEBUG] Dynamic price returned: ");
-                    Serial.println(dynamicPrice);
+                    
                 }
                 else
                 {
-                    Serial.println("[DEBUG] Using static price");
+                    
                 }
 
                 // Build response with dynamic price

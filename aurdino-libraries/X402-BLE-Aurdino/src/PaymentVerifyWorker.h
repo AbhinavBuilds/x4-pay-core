@@ -77,8 +77,7 @@ private:
                         String dynamicPrice = ble->getPrice(); // Default to static price
                         if (ble->getDynamicPriceCallback() != nullptr) {
                             dynamicPrice = ble->getDynamicPriceCallback()(job->selectedOptions, job->customContext);
-                            Serial.print("[PaymentVerifyWorker] Dynamic price calculated: ");
-                            Serial.println(dynamicPrice);
+                            
                         }
                         
                         // Build payment requirements with dynamic price
@@ -90,8 +89,7 @@ private:
                             ble->getDescription()   // description
                         );
                         
-                        Serial.println("[PaymentVerifyWorker] Dynamic payment requirements:");
-                        Serial.println(dynamicRequirements);
+                        
                     }
                     
                     ok = verifyPayment(*payload, dynamicRequirements, "");
@@ -132,6 +130,12 @@ private:
                         // Set user selections only on successful payment
                         ble->setUserCustomContext(job->customContext);
                         ble->setUserSelectedOptions(job->selectedOptions);
+                        
+                        // Call onPay callback if set
+                        if (ble->getOnPayCallback() != nullptr) {
+                            
+                            ble->getOnPayCallback()(job->selectedOptions, job->customContext);
+                        }
                     }
                 }
 

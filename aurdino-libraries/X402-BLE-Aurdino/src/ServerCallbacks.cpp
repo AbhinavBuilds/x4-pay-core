@@ -5,19 +5,19 @@ NimBLEAdvertising *pAdvertising = nullptr;
 
 void ServerCallbacks::onConnect(NimBLEServer * /*srv*/)
 {
-    Serial.println("Client connected");
+    
     // keep advertising even when connected (for multiple centrals)
     NimBLEDevice::startAdvertising();
 }
 
 void ServerCallbacks::onDisconnect(NimBLEServer * /*srv*/)
 {
-    Serial.println("Client disconnected — restarting advertising");
+    
     if (pAdvertising)
     {
         delay(500); // let BLE stack settle
         pAdvertising->start();
-        Serial.println("Advertising restarted");
+        
     }
 }
 

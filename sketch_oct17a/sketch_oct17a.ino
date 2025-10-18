@@ -4,10 +4,10 @@
 #include "X402Aurdino.h"
 #include "X402Ble.h"
 
-const String DEVICE_NAME = "X402-Test-X402";                         // BLE device name (will be visible to clients)
-const String NETWORK = "base-sepolia";                               // Blockchain network (e.g., "base-sepolia", "ethereum-mainnet")
-const String PRICE = "1000000";                                      // Price in smallest unit (e.g., 1 USDC = 1000000)
-const String PAY_TO = "0xa78eD39F695615315458Bb066ac9a5F28Dfd65FE";  // Your payment address
+const String DEVICE_NAME = "X402-Test-X402";                        
+const String NETWORK = "base-sepolia";                              
+const String PRICE = "1000000";                                     
+const String PAY_TO = "0xa78eD39F695615315458Bb066ac9a5F28Dfd65FE"; 
 const String LOGO = "https://www.shutterstock.com/image-vector/aave-crypto-currency-themed-banner-260nw-2083945819.jpg";
 const String BANNER = "https://www.shutterstock.com/image-illustration/ethereum-eth-tokens-pattern-forming-260nw-2607772913.jpg";
 const String DESCRIPTION = "This is the first device using x402-Aurdino-Ble";
@@ -21,7 +21,6 @@ const char* password = "India@123";
 void setup() {
   Serial.begin(9600);
   delay(300);
-
   connectWiFi();
 
   x402ble = new X402Ble(
@@ -33,28 +32,17 @@ void setup() {
     DESCRIPTION,
     BANNER);
 
-  x402ble->setDynamicPriceCallback([](const std::vector<String>& options, const String& customContext) -> String {
-    int price = 1000;
-    Serial.println(customContext);
-    Serial.println("Dynamic pricing...");
-    return String(price);
-  });
-
+  x402ble->setDynamicPriceCallback(dynamicprice);
+  x402ble->setOnPay(onPaymentReceived);
   x402ble->enableRecuring(60);
   x402ble->enableOptions(colors, 5);
   x402ble->allowCustomised();
 
-  Serial.println(x402ble->paymentRequirements);
-  Serial.println("Starting BLE service...");
   x402ble->begin();
-
-  Serial.println("BLE service started successfully!");
 }
 
-
-
 void loop() {
-  delay(100);
+  delay(1000);
   bool status = x402ble->getStatusAndReset();
 
   unsigned long elapsed = x402ble->getMicrosSinceLastPayment();
@@ -80,6 +68,27 @@ void loop() {
         Serial.println(opt);
       }
     }
+  }
+}
+
+String dynamicprice  (const std::vector<String>& options, const String& customContext) {
+  int price = 1000;
+  Serial.println(customContext);
+  Serial.println("Dynamic pricing...");
+  return String(price);
+}
+
+void onPaymentReceived(const std::vector<String>& options, const String& customContext) {
+  Serial.println("💰 Payment received!");
+
+  Serial.print("Custom context: ");
+  Serial.println(customContext);
+
+  Serial.print("Options selected: ");
+  Serial.println(options.size());
+  for (size_t i = 0; i < options.size(); i++) {
+    Serial.print("  - ");
+    Serial.println(options[i]);
   }
 }
 
