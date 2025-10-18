@@ -31,6 +31,7 @@ X402Ble::X402Ble(const String &device_name,
     lastPaid_ = false;
     lastTransactionhash_ = "";
     lastPayer_ = "";
+    lastPaymentTimestamp_ = 0;
     // Initialize user selection/context
     userSelectedOptions_.reserve(8);
     userCustomContext_ = "";
@@ -262,4 +263,15 @@ void X402Ble::setLastPaymentState(bool paid, const String &txHash, const String 
     lastPaid_ = paid;
     lastTransactionhash_ = txHash;
     lastPayer_ = payer;
+    if (paid) {
+        lastPaymentTimestamp_ = micros(); // Capture timestamp when payment succeeds
+    }
+}
+
+// Returns microseconds elapsed since last successful payment
+unsigned long X402Ble::getMicrosSinceLastPayment() const {
+    if (lastPaymentTimestamp_ == 0) {
+        return 0; // No payment has occurred yet
+    }
+    return micros() - lastPaymentTimestamp_;
 }

@@ -13,17 +13,10 @@ const String BANNER = "https://www.shutterstock.com/image-illustration/ethereum-
 const String DESCRIPTION = "This is the first device using x402-Aurdino-Ble";
 const String colors[] = { "red", "green", "blue", "orange", "neon" };
 
-
-// Create X402Ble instance
 X402Ble* x402ble;
 
-// WiFi credentials - UPDATE THESE!
 const char* ssid = "Krishna cottage B block 2nd";
 const char* password = "India@123";
-
-
-
-
 
 void setup() {
   Serial.begin(9600);
@@ -61,23 +54,33 @@ void setup() {
 
 
 void loop() {
-  // bool status = x402ble->getStatusAndReset();
-  // Serial.println(x402ble->getLastPaid());
-  // Serial.println(x402ble->getLastTransactionhash());
-  // Serial.println(x402ble->getLastPayer());
-  // Serial.println(x402ble->getUserCustomContext());
-  // const std::vector<String>& options = x402ble->getUserSelectedOptions();
-  // if (options.empty()) {
-  //   Serial.println("No options selected");
-  // } else {
-  //   Serial.println("Selected options:");
-  //   for (const String& opt : options) {
-  //     Serial.print("  - ");
-  //     Serial.println(opt);
-  //   }
-  // }
-  // Serial.println(status);
-  // delay(30000);
+  delay(100);
+  bool status = x402ble->getStatusAndReset();
+
+  unsigned long elapsed = x402ble->getMicrosSinceLastPayment();
+  if (elapsed == 0) {
+  } else {
+    // Or convert to seconds
+    Serial.print("That's ");
+    Serial.print(elapsed / 1000000.0);
+    Serial.println(" seconds ago");
+
+    Serial.println(x402ble->getLastPaid());
+    Serial.println(x402ble->getLastTransactionhash());
+    Serial.println(x402ble->getLastPayer());
+    Serial.println(x402ble->getUserCustomContext());
+
+    const std::vector<String>& options = x402ble->getUserSelectedOptions();
+    if (options.empty()) {
+      Serial.println("No options selected");
+    } else {
+      Serial.println("Selected options:");
+      for (const String& opt : options) {
+        Serial.print("  - ");
+        Serial.println(opt);
+      }
+    }
+  }
 }
 
 void connectWiFi() {

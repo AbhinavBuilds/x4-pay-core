@@ -49,9 +49,13 @@ public:
     bool getLastPaid() const { return lastPaid_; }
     String getLastTransactionhash() const { return lastTransactionhash_; }
     String getLastPayer() const { return lastPayer_; }
+    unsigned long getLastPaymentTimestamp() const { return lastPaymentTimestamp_; }
 
     // Returns lastPaid and resets it to false
     bool getStatusAndReset();
+    
+    // Returns microseconds elapsed since last successful payment (0 if no payment yet)
+    unsigned long getMicrosSinceLastPayment() const;
 
     // Recurring/options/customization controls
     void enableRecuring(uint32_t frequency);                    // set frequency (0 means unset)
@@ -110,6 +114,7 @@ private:
     bool lastPaid_ = false;
     String lastTransactionhash_ = "";
     String lastPayer_ = "";
+    unsigned long lastPaymentTimestamp_ = 0; // micros() when last payment succeeded
 
     // New customization fields
     uint32_t frequency_;                 // 0 = not set
