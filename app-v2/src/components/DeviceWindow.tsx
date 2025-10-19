@@ -1,6 +1,6 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { PaymentRequirements } from "../types";
 
 const DeviceWindow = ({
@@ -13,11 +13,13 @@ const DeviceWindow = ({
   allowCustomtext,
   options,
   paymentRequirements,
+  getPrice,
 }: {
   deviceName: string;
   logo: string | null;
   banner: string | null;
   description: string | null;
+  getPrice: (options: string[], customizedtext: string) => void;
   handlePayNow: (
     address: `0x${string}` | undefined,
     options: string[],
@@ -28,9 +30,48 @@ const DeviceWindow = ({
   options: string[];
   paymentRequirements: PaymentRequirements | null;
 }) => {
+  
   const { address, isConnected } = useAccount();
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [customText, setCustomText] = useState<string>("");
+
+  const getPriceWithDelay = async () => {
+    // delay of 1 seconds
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    getPrice(selectedOptions, customText);
+  };
+
+  useEffect(() => {
+    getPriceWithDelay()
+  }, [selectedOptions, customText]);
+
+  const formatDollarsFromMicros = (amountStr: string) => {
+    try {
+      const micros = BigInt(amountStr);
+      const ONE_DOLLAR = 1_000_000n; // 6 decimals
+      const ONE_CENT_IN_MICROS = 10_000n;
+
+      let dollars = micros / ONE_DOLLAR;
+      let cents = (micros % ONE_DOLLAR + ONE_CENT_IN_MICROS / 2n) / ONE_CENT_IN_MICROS; // round to nearest cent
+
+      if (cents === 100n) {
+        dollars += 1n;
+        cents = 0n;
+      }
+
+      if (cents === 0n) return `$${dollars.toString()}`;
+      const centsStr = cents.toString().padStart(2, "0");
+      return `$${dollars.toString()}.${centsStr}`;
+    } catch {
+      return `$${amountStr}`; // fallback
+    }
+  };
+
+  const payLabel = paymentRequirements?.maxAmountRequired
+    ? `Pay ${formatDollarsFromMicros(paymentRequirements.maxAmountRequired)}${
+        frequency ? ` / ${frequency} sec` : ""
+      }`
+    : "Pay Now";
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
@@ -132,7 +173,7 @@ const DeviceWindow = ({
               onClick={() => handlePayNow(address, selectedOptions, customText)}
               className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-4 rounded-lg transition-colors"
             >
-              Pay now
+              {payLabel}
             </button>
           )}
         </div>

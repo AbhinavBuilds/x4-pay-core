@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { RX_CHAR_UUID, SERVICE_UUID, TX_CHAR_UUID } from "./constants";
 import DeviceWindow from "./components/DeviceWindow";
+import RecurringDialog from "./components/RecurringDialog";
 import type { GattRefs, PaymentRequirements } from "./types";
 import {
   buildPaymentRequirements,
@@ -23,6 +24,12 @@ function App() {
   const [frequency, setFrequency] = useState<string | null>(null);
   const [options, setOptions] = useState<string[]>([]);
   const [allowCustomtext, setAllowCustomtext] = useState<boolean>(false);
+  const [showRecurringDialog, setShowRecurringDialog] =
+    useState<boolean>(false);
+  const [userActiveOptions, setUserActiveOptions] = useState<string[]>([]);
+  const [userActiveCContext, setUserActiveContext] = useState<string>("");
+  const [lastSuccessfullTransaction, setLastSuccessfullTransaction] =
+    useState<string>("");
 
   const g = useRef<GattRefs>({});
 
@@ -58,13 +65,23 @@ function App() {
       const descData = text.slice(7);
       setDescription(descData);
     } else if (text.startsWith("CONFIG://")) {
+
       const _optionsData = JSON.parse(text.slice(9));
       if (_optionsData.frequency) setFrequency(_optionsData.frequency);
-      if (_optionsData.allowCustomtext)
-        setAllowCustomtext(_optionsData.allowCustomtext);
+      if (_optionsData.allowCustomContent)
+        setAllowCustomtext(_optionsData.allowCustomContent);
     } else if (text.startsWith("OPTIONS://")) {
       const _optionsData = text.slice(10);
       setOptions(_optionsData.split(","));
+    } else if (text.startsWith("PAYMENT:COMPLETE ")) {
+      const _optionsData = text.slice(17);
+      // extract VERIFIED:true TX:0xdb07d28fb19dd7e1b5e40d86bd904b939280070dcb01e8e4ffcf0f7302333c13 from +optionsdata
+      const [verified, tx] = _optionsData.split(" ");
+      console.log("verified", verified)
+      if (verified === "VERIFIED:true") {
+        setLastSuccessfullTransaction(tx.split("TX:")[1]);
+        setShowRecurringDialog(true);
+      }
     }
   };
 
@@ -140,10 +157,12 @@ function App() {
         }
         sendData(data);
         await new Promise((resolve) => setTimeout(resolve, 1000));
+        setUserActiveContext(customizedtext);
+        setUserActiveOptions(options);
       }
     } catch (error) {
       console.error("Error creating payment payload:", error);
-      alert("Failed to create payment payload. Check console for details.");
+      
     }
   };
 
@@ -189,7 +208,7 @@ function App() {
       const encoder = new TextEncoder();
       const encodedData = encoder.encode(data);
       await g.current.rx.writeValue(encodedData);
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 10));
     } catch (error) {
       console.error("Error sending data:", error);
     }
@@ -210,17 +229,31 @@ function App() {
 
   if (activeWindow === "device" && connected) {
     return (
-      <DeviceWindow
-        deviceName={deviceName ?? "Unknown Device"}
-        banner={banner}
-        logo={logo}
-        description={description}
-        handlePayNow={handlePayNow}
-        frequency={frequency ? parseInt(frequency) : null}
-        allowCustomtext={true}
-        options={options}
-        paymentRequirements={paymentRequirements}
-      />
+      <>
+        <DeviceWindow
+          deviceName={deviceName ?? "Unknown Device"}
+          banner={banner}
+          logo={logo}
+          description={description}
+          handlePayNow={handlePayNow}
+          frequency={frequency ? parseInt(frequency) : null}
+          allowCustomtext={allowCustomtext}
+          options={options}
+          paymentRequirements={paymentRequirements}
+          getPrice={getPrice}
+        />
+        {showRecurringDialog && paymentRequirements && frequency && (
+          <RecurringDialog
+            frequency={parseInt(frequency)}
+            price={paymentRequirements.maxAmountRequired}
+            userActiveContext={userActiveCContext}
+            userActiveOptions={userActiveOptions}
+            lastSuccessfullTransaction={lastSuccessfullTransaction}
+            handlePay={handlePayNow}
+            onCancel={() => setShowRecurringDialog(false)}
+          />
+        )}
+      </>
     );
   }
 
