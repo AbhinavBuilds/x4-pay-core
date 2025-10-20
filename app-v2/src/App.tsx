@@ -33,6 +33,7 @@ function App() {
 
   const g = useRef<GattRefs>({});
 
+  // DONE in movile
   const onNotification = (event: any) => {
     const value = event.target.value;
     const decoder = new TextDecoder("utf-8");
@@ -65,7 +66,6 @@ function App() {
       const descData = text.slice(7);
       setDescription(descData);
     } else if (text.startsWith("CONFIG://")) {
-
       const _optionsData = JSON.parse(text.slice(9));
       if (_optionsData.frequency) setFrequency(_optionsData.frequency);
       if (_optionsData.allowCustomContent)
@@ -77,7 +77,7 @@ function App() {
       const _optionsData = text.slice(17);
       // extract VERIFIED:true TX:0xdb07d28fb19dd7e1b5e40d86bd904b939280070dcb01e8e4ffcf0f7302333c13 from +optionsdata
       const [verified, tx] = _optionsData.split(" ");
-      console.log("verified", verified)
+      console.log("verified", verified);
       if (verified === "VERIFIED:true") {
         setLastSuccessfullTransaction(tx.split("TX:")[1]);
         setShowRecurringDialog(true);
@@ -85,6 +85,7 @@ function App() {
     }
   };
 
+  // DONE in movile
   const getPrice = async (options: string[], customizedtext: string) => {
     const completeChunks = `${
       customizedtext.length > 0 ? customizedtext : '""'
@@ -122,6 +123,7 @@ function App() {
     }
   };
 
+  // DONE in movile
   const handlePayNow = async (
     address: `0x${string}` | undefined,
     options: string[],
@@ -162,10 +164,10 @@ function App() {
       }
     } catch (error) {
       console.error("Error creating payment payload:", error);
-      
     }
   };
 
+  // DONE in movile
   const handleScanClick = async () => {
     try {
       if (!navigator.bluetooth) {
@@ -199,6 +201,7 @@ function App() {
     }
   };
 
+  // DONE in movile
   const sendData = async (data: string) => {
     try {
       if (!g.current.rx) {
@@ -215,6 +218,7 @@ function App() {
     }
   };
 
+  // DONE in movile
   const fetchAllData = async () => {
     // await sendData("x");
     await sendData("[LOGO]");
@@ -224,6 +228,7 @@ function App() {
     await sendData("[OPTIONS]");
   };
 
+  // DONE in movile
   useEffect(() => {
     if (connected) fetchAllData();
   }, [connected]);
