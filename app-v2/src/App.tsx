@@ -207,6 +207,7 @@ function App() {
       }
       const encoder = new TextEncoder();
       const encodedData = encoder.encode(data);
+      console.log("Sending Data:", data);
       await g.current.rx.writeValue(encodedData);
       await new Promise((resolve) => setTimeout(resolve, 10));
     } catch (error) {
