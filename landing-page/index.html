@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>x4pay — Future (Dark Only)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="theme-color" content="#06060a" />
+  <style>
+    :root { color-scheme: dark; --accent: 82 139 255; }
+    body { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, Roboto, "Helvetica Neue", Arial; }
+    .sky {
+      background: radial-gradient(1200px 600px at 50% -10%, rgba(82,139,255,.22), transparent 60%),
+                  radial-gradient(1000px 500px at 10% 110%, rgba(236,72,153,.16), transparent 50%),
+                  radial-gradient(800px 600px at 90% 120%, rgba(34,211,238,.18), transparent 55%),
+                  #06060a;
+    }
+    .blur-card { backdrop-filter: blur(10px); }
+    @keyframes orbit { from { transform: rotate(0deg)} to { transform: rotate(360deg)} }
+    .animate-orbit { animation: orbit 18s linear infinite; transform-origin: center center; }
+    .sheet-enter { transform: translateY(100%); opacity:.6 }
+    .sheet-enter-active { transform: translateY(0); opacity:1; transition: all .28s cubic-bezier(.2,.8,.2,1) }
+    .no-scrollbar::-webkit-scrollbar{ display:none }
+  </style>
+</head>
+<body class="min-h-dvh sky text-white">
+  <div class="mx-auto max-w-md min-h-dvh relative">
+    <!-- STATUS / LIVE ACTIVITY BAR -->
+    <div class="sticky top-0 z-40 border-b border-white/10 bg-black/30 backdrop-blur safe-top">
+      <div class="px-4 py-3 flex items-center gap-3">
+        <div class="w-7 h-7 rounded-xl bg-white/5 grid place-items-center border border-white/10">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7l10 10-5 5V2l5 5L7 17"/></svg>
+        </div>
+        <div class="leading-tight">
+          <div class="text-[13px] text-white/60">presence</div>
+          <div id="presenceText" class="font-medium">Discovering nearby devices…</div>
+        </div>
+        <div class="ml-auto flex items-center gap-2 text-xs text-white/60">
+          <span id="presenceDot" class="inline-block w-1.5 h-1.5 rounded-full bg-white/60"></span>
+          <span id="presenceCount">0</span>
+        </div>
+      </div>
+    </div>
+
+    <main class="pb-24">
+      <!-- HOME: two states inside same tab -->
+      <section id="page-home" class="px-4 py-6 grid gap-6">
+        <!-- SCAN STATE -->
+        <div id="scanState" class="grid gap-6">
+          <div class="relative aspect-square max-w-sm mx-auto">
+            <div class="absolute inset-0 rounded-full border border-white/10"></div>
+            <div class="absolute inset-6 rounded-full border border-white/10"></div>
+            <div class="absolute inset-12 rounded-full border border-white/10"></div>
+            <div class="absolute inset-0 grid place-items-center">
+              <button id="autoConnect" class="px-4 py-2 rounded-full bg-white/10 border border-white/20 hover:bg-white/15 text-sm">Tap to Auto‑Connect</button>
+            </div>
+            <div id="orbitLayer" class="absolute inset-0 animate-orbit"></div>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-white/5 blur-card overflow-hidden">
+            <div class="px-4 py-3 text-sm text-white/60">Nearby</div>
+            <div id="nearbyList" class="divide-y divide-white/10"></div>
+          </div>
+        </div>
+
+        <!-- DEVICE STATE (in HOME, no extra tab) -->
+        <div id="deviceState" class="hidden grid gap-4">
+          <!-- Device banner -->
+          <div id="deviceBanner" class="rounded-3xl overflow-hidden border border-white/10">
+            <div id="deviceBannerBg" class="h-24 w-full" style="background:linear-gradient(90deg, rgba(82,139,255,.25), rgba(34,211,238,.2))"></div>
+            <div class="p-4 flex items-center gap-3">
+              <div id="deviceLogo" class="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 grid place-items-center text-lg font-semibold">N</div>
+              <div class="grow">
+                <div id="deviceName" class="font-semibold text-base">—</div>
+                <div id="deviceDesc" class="text-xs text-white/70">—</div>
+              </div>
+              <button id="disconnectBtn" class="h-9 px-4 rounded-full border border-white/20 hover:bg-white/10 disabled:opacity-40" disabled>Disconnect</button>
+            </div>
+          </div>
+
+          <!-- Services -->
+          <div id="servicesWrap" class="grid gap-3"></div>
+        </div>
+      </section>
+
+      <!-- WALLET TAB (Base · USDC) -->
+      <section id="page-wallet" class="hidden px-4 py-6 grid gap-6">
+        <div class="rounded-2xl border border-white/10 bg-white/5 blur-card p-4">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-xs text-white/60">Wallet · Base</div>
+              <div class="mt-0.5 text-2xl font-semibold"><span id="usdcBal">$0.00</span> <span class="text-base font-normal">USDC</span></div>
+              <div id="walletAddr" class="text-xs text-white/60 mt-1">—</div>
+            </div>
+            <div class="flex gap-2">
+              <button id="btnDeposit" class="h-9 px-4 rounded-full border border-white/20 hover:bg-white/10">Deposit</button>
+              <button id="btnWithdraw" class="h-9 px-4 rounded-full border border-white/20 hover:bg-white/10">Withdraw</button>
+            </div>
+          </div>
+          <div class="mt-3 grid grid-cols-2 gap-2">
+            <button id="btnRecover" class="h-10 rounded-xl border border-white/15 hover:bg-white/10 text-sm">Recover wallet</button>
+            <button id="btnBackup" class="h-10 rounded-xl border border-white/15 hover:bg-white/10 text-sm">Backup</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS TAB (minimal) -->
+      <section id="page-settings" class="hidden px-4 py-6 grid gap-6">
+        <div class="rounded-2xl border border-white/10 bg-white/5 blur-card p-4">
+          <div class="font-semibold mb-1">Settings</div>
+          <p class="text-sm text-white/70">Dark theme is enforced. More settings coming soon.</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- BOTTOM DOCK (Home · Wallet · Settings) -->
+    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md safe-bottom">
+      <div class="mx-4 mb-2 rounded-2xl border border-white/10 bg-black/40 backdrop-blur shadow-2xl">
+        <div class="grid grid-cols-3">
+          <button data-tab="home" class="dock-btn flex flex-col items-center py-2 text-[11px] text-white">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M9 22V12h6v10"/></svg>
+            Home
+          </button>
+          <button data-tab="wallet" class="dock-btn flex flex-col items-center py-2 text-[11px] text-white/70">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7H3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h18V7z"/><path d="M21 7V5a2 2 0 0 0-2-2H7"/></svg>
+            Wallet
+          </button>
+          <button data-tab="settings" class="dock-btn flex flex-col items_center py-2 text-[11px] text-white/70">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09c.7 0 1.31-.4 1.51-1a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06c.5.5 1.2.65 1.82.33.6-.2 1-.81 1-1.51V3a2 2 0 1 1 4 0v.09c0 .7.4 1.31 1 1.51.62.32 1.32.17 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06-.06c-.5.5-.65 1.2-.33 1.82.2.6.81 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.7 0-1.31.4-1.51 1z"/></svg>
+            Settings
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- DEVICE CHECKOUT BAR (only when connected + cart>0) -->
+    <div id="checkoutBar" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-md px-4 z-40">
+      <button id="checkoutBtn" class="w-full h-12 rounded-full bg-white text-black font-medium flex items-center justify-center gap-2 shadow-lg">
+        <span id="checkoutLabel">$0.00 — Review & Pay</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- PAYMENT SHEET (USDC · Base) -->
+  <div id="paySheet" class="hidden fixed inset-0 z-50">
+    <div id="sheetBackdrop" class="absolute inset-0 bg-black/70"></div>
+    <div id="sheetPanel" class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md rounded-t-3xl bg-black/60 border-t border-white/10 backdrop-blur-xl sheet-enter">
+      <div class="pt-2"><div class="mx-auto w-12 h-1.5 rounded-full bg-white/20"></div></div>
+      <div class="p-5 grid gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 grid place-items-center">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7l10 10-5 5V2l5 5L7 17"/></svg>
+          </div>
+          <div>
+            <div class="text-xs text-white/60">Paying</div>
+            <div id="sheetMerchant" class="font-semibold">—</div>
+          </div>
+          <div class="ml-auto text-right">
+            <div class="text-xs text-white/60">Total</div>
+            <div id="sheetTotal" class="text-xl font-semibold">$0.00</div>
+          </div>
+        </div>
+        <div class="rounded-xl border border-white/15 p-3 flex items-center justify-between text-sm">
+          <span class="text-white/80">Method</span>
+          <span class="font-medium">USDC · Base</span>
+        </div>
+        <div class="rounded-2xl border border-white/15 p-3">
+          <div id="sheetItemsList" class="text-sm space-y-1"></div>
+          <div class="mt-3 grid gap-1 text-sm">
+            <div class="flex items-center justify-between text-white/70"><span>Fees</span><span id="sheetFees">$0.00</span></div>
+            <div class="flex items-center justify-between font-medium"><span>Total</span><span id="sheetTotal2">$0.00</span></div>
+          </div>
+        </div>
+        <button id="sheetConfirm" class="h-12 rounded-full bg-white text-black font-medium">Confirm & Beam</button>
+        <div id="sheetError" class="hidden text-center text-xs text-red-400">Insufficient balance</div>
+        <div id="authWrap" class="hidden grid place-items-center py-3">
+          <div class="relative w-16 h-16">
+            <div class="absolute inset-0 rounded-full border-2 border-white/20"></div>
+            <div class="absolute inset-0 rounded-full border-2 border-white animate-pulse"></div>
+          </div>
+          <div id="authText" class="mt-2 text-xs text-white/70">Authenticating…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEPOSIT / WITHDRAW / RECOVER / BACKUP SHEETS -->
+  <div id="modalBackdrop" class="hidden fixed inset-0 z-40 bg-black/70"></div>
+  <div id="depositSheet" class="hidden fixed inset-x-0 bottom-0 z-50 max-w-md mx-auto rounded-t-2xl bg-black/70 backdrop-blur border-t border-white/10 p-5">
+    <div class="text-sm text-white/60">Deposit to</div>
+    <div class="font-semibold">USDC · Base</div>
+    <div class="mt-3 rounded-xl border border-white/15 p-3">
+      <div id="depAddr" class="text-xs break-all">—</div>
+      <div class="mt-2 flex gap-2">
+        <button id="copyAddr" class="h-9 px-3 rounded-lg border border-white/20 hover:bg-white/10 text-sm">Copy address</button>
+        <button id="simulateDeposit" class="h-9 px-3 rounded-lg border border-white/20 hover:bg-white/10 text-sm">Simulate +10 USDC</button>
+      </div>
+    </div>
+    <button class="mt-3 w-full h-11 rounded-full bg-white text-black font-medium" onclick="closeModal()">Done</button>
+  </div>
+
+  <div id="withdrawSheet" class="hidden fixed inset-x-0 bottom-0 z-50 max-w-md mx-auto rounded-t-2xl bg-black/70 backdrop-blur border-t border-white/10 p-5">
+    <div class="text-sm text-white/60">Withdraw</div>
+    <div class="font-semibold">USDC · Base</div>
+    <div class="mt-3 grid gap-2">
+      <input id="wdTo" class="h-11 rounded-xl border border-white/15 bg-black/50 px-3" placeholder="To address (0x...)" />
+      <input id="wdAmt" type="number" min="0" step="0.01" class="h-11 rounded-xl border border-white/15 bg-black/50 px-3" placeholder="Amount in USDC" />
+      <div id="wdErr" class="hidden text-xs text-red-400">—</div>
+    </div>
+    <div class="mt-3 flex gap-2">
+      <button class="h-11 flex-1 rounded-xl border border-white/20 hover:bg-white/10" onclick="closeModal()">Cancel</button>
+      <button id="wdSend" class="h-11 flex-1 rounded-xl bg_white text-black font-medium">Send</button>
+    </div>
+  </div>
+
+  <div id="recoverSheet" class="hidden fixed inset-x-0 bottom-0 z-50 max-w-md mx-auto rounded-t-2xl bg-black/70 backdrop-blur border-t border-white/10 p-5">
+    <div class="font-semibold mb-1">Recover wallet</div>
+    <p class="text-xs text-white/70">Paste your 12/24‑word phrase or upload a backup file. (Local mock only.)</p>
+    <textarea id="rcPhrase" class="mt-3 w-full h-28 rounded-xl border border-white/15 bg-black/50 p-3 text-sm" placeholder="seed phrase or JSON…"></textarea>
+    <div class="mt-3 flex gap-2">
+      <button class="h-11 flex-1 rounded-xl border border-white/20 hover:bg-white/10" onclick="closeModal()">Cancel</button>
+      <button id="rcRestore" class="h-11 flex-1 rounded-xl bg-white text-black font-medium">Restore</button>
+    </div>
+  </div>
+
+  <div id="backupSheet" class="hidden fixed inset-x-0 bottom-0 z-50 max-w-md mx-auto rounded-t-2xl bg-black/70 backdrop-blur border-t border-white/10 p-5">
+    <div class="font-semibold mb-1">Backup wallet</div>
+    <p class="text-xs text-white/70">Download an encrypted backup (mock JSON). Keep it safe.</p>
+    <div class="mt-3 flex gap-2">
+      <button class="h-11 flex-1 rounded-xl border border-white/20 hover:bg-white/10" onclick="closeModal()">Close</button>
+      <button id="bkDownload" class="h-11 flex-1 rounded-xl bg-white text-black font-medium">Download backup</button>
+    </div>
+  </div>
+
+  <script>
+    // ===== Mock data / helpers =====
+    const SERVICES = [
+      { id:'bike', name:'Bike', priceUSD:2.5, unit:'30 min', icon:bikeIcon },
+      { id:'coffee', name:'Coffee', priceUSD:1.7, unit:'cup', icon:coffeeIcon },
+      { id:'charge', name:'Charge', priceUSD:0.9, unit:'15 min', icon:zapIcon },
+      { id:'snack', name:'Snack', priceUSD:1.2, unit:'item', icon:snackIcon }
+    ];
+    const NEARBY = [
+      { id:'esp32-01', name:'Node Aster', rssi:-58, services:['coffee','snack'], logo:'A', banner:['#528bff','#22d3ee'], desc:'Campus café node — tap to pay for snacks & coffee.' },
+      { id:'esp32-02', name:'Dock Helio', rssi:-63, services:['bike'], logo:'H', banner:['#22d3ee','#eab308'], desc:'Bike dock 7 — rent a bike in seconds.' },
+      { id:'esp32-03', name:'Hub Ion', rssi:-72, services:['charge','snack'], logo:'I', banner:['#a78bfa','#22d3ee'], desc:'Charging hub — pay-as-you-go power.' },
+    ];
+    const fmtUSD = n => `$${n.toFixed(2)}`;
+    const short = a => a.slice(0,6) + '…' + a.slice(-4);
+
+    // ===== State =====
+    let connected=false, device=null, available=[], cart=[];
+    let wallet = { chain:'Base', usdc: 120.00, address: '0xA1b2c3D4e5F6a7B8c9d0AaBbCcDdEeFf11223344' };
+
+    // ===== Tabs (Home · Wallet · Settings) =====
+    const pages = { home: qs('#page-home'), wallet: qs('#page-wallet'), settings: qs('#page-settings') };
+    const dockBtns = document.querySelectorAll('.dock-btn');
+    function setTab(name){ Object.entries(pages).forEach(([k,el])=> el.classList.toggle('hidden', k!==name)); dockBtns.forEach(b=> b.classList.toggle('text-white', b.dataset.tab===name)); scrollTo({top:0, behavior:'smooth'}); }
+    dockBtns.forEach(b=> b.addEventListener('click', ()=> setTab(b.dataset.tab)));
+
+    // ===== Scan vs Device states (Home) =====
+    const scanState = qs('#scanState'); const deviceState = qs('#deviceState');
+    const orbit = qs('#orbitLayer'); const nearbyList = qs('#nearbyList'); const presenceText = qs('#presenceText'); const presenceCount = qs('#presenceCount'); const presenceDot = qs('#presenceDot');
+    const deviceName = qs('#deviceName'); const deviceDesc = qs('#deviceDesc'); const deviceLogo = qs('#deviceLogo'); const deviceBannerBg = qs('#deviceBannerBg'); const disconnectBtn = qs('#disconnectBtn');
+
+    renderOrbit(); renderNearby(); renderWallet();
+    function renderOrbit(){
+      orbit.innerHTML=''; const cx=160, cy=160, r=120;
+      NEARBY.forEach((d,i)=>{
+        const button = document.createElement('button');
+        const angle = (i/NEARBY.length)*Math.PI*2;
+        button.className = 'absolute -translate-x-1/2 -translate-y-1/2 px-3 py-1.5 rounded-full border border-white/20 bg-white/10 text-xs hover:bg-white/15 disabled:opacity-40 disabled:cursor-not-allowed';
+        button.style.left = (cx + Math.cos(angle)*r)+'px';
+        button.style.top  = (cy + Math.sin(angle)*r)+'px';
+        button.innerHTML = `${signalBars(rssiBars(d.rssi))} <span class='ml-1'>${d.name}</span>`;
+        if(connected && device && d.id !== device.id){ button.disabled = true; }
+        button.onclick = ()=> connected ? null : connect(d);
+        orbit.appendChild(button);
+      });
+      presenceText.textContent = connected ? `Connected to ${device?.name||''}` : 'Devices around you';
+      presenceCount.textContent = NEARBY.length;
+    }
+
+    function renderNearby(){
+      nearbyList.innerHTML='';
+      NEARBY.sort((a,b)=>b.rssi-a.rssi).forEach(d=>{
+        const row = document.createElement('button');
+        row.className = 'w-full px-4 py-3 flex items-center justify-between hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed';
+        row.innerHTML = `
+          <div class='flex items-center gap-3'>
+            <div class='w-10 h-10 rounded-xl grid place-items-center bg-white/10 border border-white/10'>${bluetoothIcon()}</div>
+            <div><div class='font-medium'>${d.name}</div><div class='text-xs text-white/60'>${d.id}</div></div>
+          </div>
+          ${signalBars(rssiBars(d.rssi))}`;
+        if(connected && device && d.id !== device.id){ row.disabled = true; }
+        row.onclick = ()=> connected ? null : connect(d);
+        nearbyList.appendChild(row);
+      })
+    }
+
+    function rssiBars(v){ if(v>-60) return 4; if(v>-67) return 3; if(v>-75) return 2; return 1 }
+
+    // ===== Connect / Disconnect & Services =====
+    const servicesWrap = qs('#servicesWrap');
+    function connect(d){
+      connected=true; device=d; available=d.services;
+      presenceDot.className='inline-block w-1.5 h-1.5 rounded-full bg-emerald-400';
+      // banner + logo + description
+      deviceName.textContent=d.name; deviceDesc.textContent=d.desc||'';
+      deviceLogo.textContent=(d.logo||'X').toString().slice(0,1).toUpperCase();
+      deviceBannerBg.style.background = `linear-gradient(90deg, ${d.banner?.[0]||'#528bff'}, ${d.banner?.[1]||'#22d3ee'})`;
+      // toggle states
+      scanState.classList.add('hidden'); deviceState.classList.remove('hidden');
+      disconnectBtn.disabled = false; disconnectBtn.onclick = disconnect;
+      renderServices(); updateCheckoutBar(); renderOrbit(); renderNearby();
+    }
+    function disconnect(){
+      connected=false; device=null; available=[]; cart=[];
+      presenceDot.className='inline-block w-1.5 h-1.5 rounded-full bg-white/60';
+      scanState.classList.remove('hidden'); deviceState.classList.add('hidden');
+      servicesWrap.innerHTML=''; updateCheckoutBar(); renderOrbit(); renderNearby();
+    }
+
+    function getQty(id){ const it=cart.find(c=>c.id===id); return it?it.qty:0 }
+    function setQty(id, name, priceUSD, qty){ const i=cart.findIndex(c=>c.id===id); if(qty<=0){ if(i>-1) cart.splice(i,1);} else if(i>-1){ cart[i].qty=qty } else { cart.push({id,name,priceUSD,qty}) } renderServices(); updateCheckoutBar(); }
+
+    function renderServices(){
+      servicesWrap.innerHTML='';
+      const list = SERVICES.filter(s=> available.includes(s.id));
+      list.forEach(svc=>{
+        const qty = getQty(svc.id);
+        const card = document.createElement('div');
+        card.className = 'rounded-2xl border border-white/10 bg-white/5 blur-card p-4 flex items-center justify-between';
+        card.innerHTML = `
+          <div class='flex items-center gap-3'>
+            <div class='w-11 h-11 rounded-2xl bg-white/10 border border-white/10 grid place-items-center'>${svc.icon()}</div>
+            <div>
+              <div class='font-semibold'>${svc.name}</div>
+              <div class='text-xs text-white/60'>${svc.unit}</div>
+            </div>
+          </div>
+          <div class='text-right'>
+            <div class='font-semibold'>${fmtUSD(svc.priceUSD)}</div>
+            <div class='mt-1' data-role='control'></div>
+          </div>`;
+        const ctrl = card.querySelector('[data-role="control"]');
+        ctrl.innerHTML = qty===0 ? `<button class='h-9 px-4 rounded-full border border-white/20 hover:bg-white/10'>Add</button>` : stepper(qty);
+        if(qty===0){ ctrl.querySelector('button').onclick = ()=> setQty(svc.id, svc.name, svc.priceUSD, 1) }
+        else {
+          const dec = ctrl.querySelector('[data-act="dec"]');
+          const inc = ctrl.querySelector('[data-act="inc"]');
+          dec.onclick = ()=> setQty(svc.id, svc.name, svc.priceUSD, qty-1);
+          inc.onclick = ()=> setQty(svc.id, svc.name, svc.priceUSD, qty+1);
+        }
+        servicesWrap.appendChild(card);
+      })
+    }
+
+    function stepper(qty){
+      return `<div class='inline-flex items-center rounded-full border border-white/25 overflow-hidden'>
+        <button data-act='dec' class='w-9 h-9 grid place-items-center hover:bg-white/10'>−</button>
+        <div class='min-w-8 text-center text-sm font-medium px-2'>${qty}</div>
+        <button data-act='inc' class='w-9 h-9 grid place-items-center hover:bg-white/10'>+</button>
+      </div>`
+    }
+
+    // ===== Wallet (Base · USDC) =====
+    const usdcBal = qs('#usdcBal'); const walletAddr = qs('#walletAddr');
+    function renderWallet(){ usdcBal.textContent = fmtUSD(wallet.usdc); walletAddr.textContent = `${short(wallet.address)} · Base`; qs('#depAddr').textContent = wallet.address; }
+
+    // ===== Checkout bar in device view =====
+    const checkoutBar = qs('#checkoutBar'); const checkoutBtn = qs('#checkoutBtn'); const checkoutLabel = qs('#checkoutLabel');
+    checkoutBtn.addEventListener('click', openSheet);
+
+    function totals(){ const subtotal = cart.reduce((s,i)=> s + i.priceUSD*i.qty, 0); const fees = subtotal*0.015; const total=subtotal+fees; return {subtotal, fees, total} }
+    function updateCheckoutBar(){
+      if(!connected){ checkoutBar.classList.add('hidden'); return; }
+      const { total } = totals(); const count = cart.reduce((a,b)=>a+b.qty,0);
+      if(count>0){ checkoutBar.classList.remove('hidden'); checkoutLabel.textContent = `${fmtUSD(total)} — Review & Pay`; }
+      else { checkoutBar.classList.add('hidden'); }
+    }
+
+    // ===== Payment Sheet (USDC · Base) =====
+    const paySheet = qs('#paySheet'); const sheetPanel = qs('#sheetPanel'); const sheetBackdrop = qs('#sheetBackdrop');
+    const sheetMerchant = qs('#sheetMerchant'); const sheetItemsList = qs('#sheetItemsList'); const sheetTotal = qs('#sheetTotal'); const sheetTotal2 = qs('#sheetTotal2'); const sheetFees = qs('#sheetFees');
+    const sheetConfirm = qs('#sheetConfirm'); const sheetError = qs('#sheetError'); const authWrap = qs('#authWrap'); const authText = qs('#authText');
+
+    function openSheet(){
+      const {subtotal, fees, total} = totals();
+      sheetMerchant.textContent = device?.name || '—';
+      sheetItemsList.innerHTML = cart.map(i=>`<div class='flex items-center justify-between'><span>${i.name} × ${i.qty}</span><span>${fmtUSD(i.priceUSD*i.qty)}</span></div>`).join('');
+      sheetFees.textContent = fmtUSD(fees); sheetTotal.textContent=fmtUSD(total); sheetTotal2.textContent=fmtUSD(total);
+      updateConfirmState(total);
+      sheetError.classList.add('hidden');
+      paySheet.classList.remove('hidden'); requestAnimationFrame(()=> sheetPanel.classList.add('sheet-enter-active'));
+    }
+    function closeSheet(){ paySheet.classList.add('hidden'); sheetPanel.classList.remove('sheet-enter-active'); authWrap.classList.add('hidden'); }
+    sheetBackdrop.onclick = closeSheet;
+
+    function updateConfirmState(total){
+      const need = total; // USDC 1:1
+      const have = wallet.usdc;
+      if(have < need){
+        sheetConfirm.disabled = true;
+        sheetError.textContent = `Insufficient USDC (need ${fmtUSD(need)})`;
+        sheetError.classList.remove('hidden');
+      } else {
+        sheetConfirm.disabled = false; sheetError.classList.add('hidden');
+      }
+    }
+
+    sheetConfirm.onclick = ()=>{
+      const { total } = totals();
+      if(wallet.usdc < total){ updateConfirmState(total); return; }
+      sheetConfirm.disabled = true; authWrap.classList.remove('hidden'); authText.textContent = 'Authenticating…';
+      setTimeout(()=> authText.textContent='Beaming over Bluetooth…', 900);
+      setTimeout(()=> {
+        wallet.usdc = Math.max(0, wallet.usdc - total);
+        renderWallet();
+        authText.textContent = 'Paid';
+        cart=[]; renderServices(); updateCheckoutBar();
+        setTimeout(()=> closeSheet(), 700);
+        sheetConfirm.disabled=false;
+      }, 1800);
+    }
+
+    // ===== Modals: deposit / withdraw / recover / backup =====
+    const modalBackdrop = qs('#modalBackdrop');
+    const depositSheet = qs('#depositSheet'); const withdrawSheet = qs('#withdrawSheet'); const recoverSheet = qs('#recoverSheet'); const backupSheet = qs('#backupSheet');
+    const btnDeposit = qs('#btnDeposit'); const btnWithdraw = qs('#btnWithdraw'); const btnRecover = qs('#btnRecover'); const btnBackup = qs('#btnBackup');
+
+    btnDeposit.onclick = ()=> openModal(depositSheet);
+    btnWithdraw.onclick = ()=> openModal(withdrawSheet);
+    btnRecover.onclick = ()=> openModal(recoverSheet);
+    btnBackup.onclick = ()=> openModal(backupSheet);
+
+    function openModal(sheet){ modalBackdrop.classList.remove('hidden'); sheet.classList.remove('hidden'); }
+    function closeModal(){ modalBackdrop.classList.add('hidden'); [depositSheet,withdrawSheet,recoverSheet,backupSheet].forEach(s=> s.classList.add('hidden')); }
+    window.closeModal = closeModal;
+    modalBackdrop.onclick = closeModal;
+
+    // Deposit actions
+    const copyAddr = qs('#copyAddr'); const simulateDeposit = qs('#simulateDeposit');
+    copyAddr.onclick = ()=> { navigator.clipboard.writeText(wallet.address).catch(()=>{}); };
+    simulateDeposit.onclick = ()=> { wallet.usdc += 10; renderWallet(); updateCheckoutBar(); };
+
+    // Withdraw actions
+    const wdTo = qs('#wdTo'); const wdAmt = qs('#wdAmt'); const wdErr = qs('#wdErr'); const wdSend = qs('#wdSend');
+    wdSend.onclick = ()=>{
+      const to = (wdTo.value||'').trim(); const amt = parseFloat(wdAmt.value||'0');
+      if(!to || !to.startsWith('0x') || to.length<10){ wdErr.textContent='Enter a valid address'; wdErr.classList.remove('hidden'); return; }
+      if(!(amt>0)){ wdErr.textContent='Enter a valid amount'; wdErr.classList.remove('hidden'); return; }
+      if(amt>wallet.usdc){ wdErr.textContent='Insufficient balance'; wdErr.classList.remove('hidden'); return; }
+      wdErr.classList.add('hidden'); wallet.usdc -= amt; renderWallet(); closeModal();
+    };
+
+    // Recover actions
+    const rcPhrase = qs('#rcPhrase'); const rcRestore = qs('#rcRestore');
+    rcRestore.onclick = ()=>{ const data = rcPhrase.value.trim(); if(!data){ return; } wallet.address = '0x' + Math.random().toString(16).slice(2).padEnd(40,'0').slice(0,40); wallet.usdc = 0; renderWallet(); closeModal(); };
+
+    // Backup actions
+    const bkDownload = qs('#bkDownload');
+    bkDownload.onclick = ()=>{
+      const payload = { chain: wallet.chain, address: wallet.address, createdAt: new Date().toISOString(), hint: 'mock-encrypted' };
+      const blob = new Blob([JSON.stringify(payload,null,2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'x4pay-backup.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    };
+
+    // ===== Utils / Icons =====
+    function qs(s){ return document.querySelector(s) }
+    function bluetoothIcon(){ return '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7l10 10-5 5V2l5 5L7 17"/></svg>' }
+    function signalBars(n){ return `<div class='flex gap-0.5 items-end' aria-label='Signal ${n}/4'>${[1,2,3,4].map(i=>`<div class='w-1 rounded ${i<=n?'bg-white':'bg-white/30'}' style='height:${i*4}px'></div>`).join('')}</div>` }
+    function rssiBars(v){ if(v>-60) return 4; if(v>-67) return 3; if(v>-75) return 2; return 1 }
+    function bikeIcon(){ return '<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M12 17.5h2l-3-7h4l2 4"/></svg>' }
+    function coffeeIcon(){ return '<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h14v5a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8Z"/><path d="M17 8h1a3 3 0 1 1 0 6h-1"/></svg>' }
+    function snackIcon(){ return '<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h10l-1 4H8L7 3Z"/><path d="M8 7v13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7"/></svg>' }
+    function zapIcon(){ return '<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 3L4 14h7l-1 7 9-11h-7l1-7z"/></svg>' }
+
+    // ===== Init =====
+    setTab('home');
+  </script>
+</body>
+</html>
