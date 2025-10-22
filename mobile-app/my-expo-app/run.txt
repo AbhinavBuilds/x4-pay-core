@@ -1,2 +1,0 @@
- adb shell am start -a android.intent.action.VIEW \
-   -d "exp+my-expo-app://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8081"
