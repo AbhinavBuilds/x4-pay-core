@@ -12,7 +12,7 @@ const String NETWORK = "base-sepolia";
 const String PRICE = "1000000";
 const String PAY_TO = "0x65B7d5f0108DfE6fc6548bdC818b392588496c11";
 const String LOGO = "https://pbs.twimg.com/profile_images/1974193106758115328/I62W5om4_400x400.jpg";
-const String BANNER = "https://pbs.twimg.com/profile_banners/1956008609847894017/1759517897/600x200";
+const String BANNER = "https://images.pexels.com/photos/2047905/pexels-photo-2047905.jpeg?_gl=1*1ovh7xl*_ga*MTQ1MDEzNjQzMS4xNzU5NDc3MTk1*_ga_8JE65Q40S6*czE3NjExNTc4NDckbzQkZzEkdDE3NjExNTc4ODUkajIyJGwwJGgw";
 const String DESCRIPTION = "This is the first device using x402 using Ble on a Microcontroller, Have some fun, to catch up visit x : @AbhinavBuilds";
 const String options[] = { "LED", "Buzzer" };
 int FREQUENCY = 15;  // Seconds
@@ -23,6 +23,9 @@ bool firstTransactionMade = false;
 
 const char* ssid = "Krishna cottage B block 2nd";
 const char* password = "India@123";
+
+// const char* ssid = "Krishna cottage B Top";
+// const char* password = "India@12345";
 
 void setup() {
   pinMode(ledPin, OUTPUT);

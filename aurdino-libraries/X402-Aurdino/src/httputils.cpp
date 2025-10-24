@@ -25,6 +25,9 @@ HttpResponse postJson(const String &url, const String &jsonPayload, const String
     // Enable redirect following (important for 301/302/307/308 responses)
     http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
 
+    // Set timeout to 60 seconds for blockchain operations (settle can take 30-45s)
+    http.setTimeout(60000);  // 60 seconds in milliseconds
+
     // Default content type
     http.addHeader("Content-Type", "application/json");
 

@@ -79,6 +79,13 @@ void RxCallbacks::onWrite(NimBLECharacteristic *ch)
                         start = comma + 1;
                     }
                 }
+Serial.println("Payment JSON: " + jsonPart);
+Serial.println("Custom Context: " + customContext);
+Serial.print("Selected Options: ");
+for (const auto& opt : selectedOptions) {
+    Serial.print(opt + " ");
+}
+Serial.println();
 
                 // Pass to worker - will only be set on X402Ble if payment succeeds
                 // Payment requirements will be built dynamically in the worker with dynamic price

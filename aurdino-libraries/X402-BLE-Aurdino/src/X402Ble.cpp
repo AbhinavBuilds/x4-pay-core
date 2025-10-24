@@ -5,9 +5,9 @@
 #include <algorithm>
 #include <cctype>
 
-const char *X402Ble::SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-const char *X402Ble::TX_CHAR_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
-const char *X402Ble::RX_CHAR_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+const char *X402Ble::SERVICE_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+const char *X402Ble::TX_CHAR_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+const char *X402Ble::RX_CHAR_UUID = "6e400004-b5a3-f393-e0a9-e50e24dcca9e";
 
 // Memory-optimized constructor with move semantics where possible
 X402Ble::X402Ble(const String &device_name,
@@ -267,5 +267,15 @@ unsigned long X402Ble::getMicrosSinceLastPayment() const
     {
         return 0; // No payment has occurred yet
     }
-    return micros() - lastPaymentTimestamp_;
+    
+    unsigned long current = micros();
+    unsigned long timestamp = lastPaymentTimestamp_;
+    
+    // Handle micros() overflow (happens every ~70 minutes)
+    if (current >= timestamp) {
+        return current - timestamp;
+    } else {
+        // Overflow occurred, calculate correctly
+        return (0xFFFFFFFF - timestamp) + current + 1;
+    }
 }

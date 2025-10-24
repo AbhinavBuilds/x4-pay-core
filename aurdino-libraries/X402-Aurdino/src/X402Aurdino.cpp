@@ -149,7 +149,7 @@ String settlePayment(const PaymentPayload &decodedSignedPayload, const String &p
     HttpResponse response = makePaymentApiCall("settle", decodedSignedPayload, paymentRequirements, customHeaders);
     
     STACK_CHECKPOINT("settlePayment:after_api_call");
-    
+    Serial.println("Settlement response : " + String(response.body));
     if (response.success && response.statusCode == 200) {
         // Return a copy and free the response
         String result = response.body;

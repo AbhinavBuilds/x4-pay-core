@@ -94,6 +94,7 @@ private:
                     
                     ok = verifyPayment(*payload, dynamicRequirements, "");
                     
+                    
                     // If verification succeeded, settle the payment
                     if (ok)
                     {
@@ -126,7 +127,7 @@ private:
                 // Only set user context/options if payment was successful
                 if (ok) {
                     if (X402Ble* ble = X402Ble::getActiveInstance()) {
-                        ble->setLastPaymentState(true, txHash, payer);
+                        ble->setLastPaymentState(true, txHash, payer);   
                         // Set user selections only on successful payment
                         ble->setUserCustomContext(job->customContext);
                         ble->setUserSelectedOptions(job->selectedOptions);

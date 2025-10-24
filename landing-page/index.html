@@ -1,483 +1,3106 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>x4pay — Future (Dark Only)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <meta name="theme-color" content="#06060a" />
-  <style>
-    :root { color-scheme: dark; --accent: 82 139 255; }
-    body { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, Roboto, "Helvetica Neue", Arial; }
-    .sky {
-      background: radial-gradient(1200px 600px at 50% -10%, rgba(82,139,255,.22), transparent 60%),
-                  radial-gradient(1000px 500px at 10% 110%, rgba(236,72,153,.16), transparent 50%),
-                  radial-gradient(800px 600px at 90% 120%, rgba(34,211,238,.18), transparent 55%),
-                  #06060a;
-    }
-    .blur-card { backdrop-filter: blur(10px); }
-    @keyframes orbit { from { transform: rotate(0deg)} to { transform: rotate(360deg)} }
-    .animate-orbit { animation: orbit 18s linear infinite; transform-origin: center center; }
-    .sheet-enter { transform: translateY(100%); opacity:.6 }
-    .sheet-enter-active { transform: translateY(0); opacity:1; transition: all .28s cubic-bezier(.2,.8,.2,1) }
-    .no-scrollbar::-webkit-scrollbar{ display:none }
-  </style>
-</head>
-<body class="min-h-dvh sky text-white">
-  <div class="mx-auto max-w-md min-h-dvh relative">
-    <!-- STATUS / LIVE ACTIVITY BAR -->
-    <div class="sticky top-0 z-40 border-b border-white/10 bg-black/30 backdrop-blur safe-top">
-      <div class="px-4 py-3 flex items-center gap-3">
-        <div class="w-7 h-7 rounded-xl bg-white/5 grid place-items-center border border-white/10">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7l10 10-5 5V2l5 5L7 17"/></svg>
-        </div>
-        <div class="leading-tight">
-          <div class="text-[13px] text-white/60">presence</div>
-          <div id="presenceText" class="font-medium">Discovering nearby devices…</div>
-        </div>
-        <div class="ml-auto flex items-center gap-2 text-xs text-white/60">
-          <span id="presenceDot" class="inline-block w-1.5 h-1.5 rounded-full bg-white/60"></span>
-          <span id="presenceCount">0</span>
-        </div>
-      </div>
-    </div>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <main class="pb-24">
-      <!-- HOME: two states inside same tab -->
-      <section id="page-home" class="px-4 py-6 grid gap-6">
-        <!-- SCAN STATE -->
-        <div id="scanState" class="grid gap-6">
-          <div class="relative aspect-square max-w-sm mx-auto">
-            <div class="absolute inset-0 rounded-full border border-white/10"></div>
-            <div class="absolute inset-6 rounded-full border border-white/10"></div>
-            <div class="absolute inset-12 rounded-full border border-white/10"></div>
-            <div class="absolute inset-0 grid place-items-center">
-              <button id="autoConnect" class="px-4 py-2 rounded-full bg-white/10 border border-white/20 hover:bg-white/15 text-sm">Tap to Auto‑Connect</button>
-            </div>
-            <div id="orbitLayer" class="absolute inset-0 animate-orbit"></div>
-          </div>
-          <div class="rounded-2xl border border-white/10 bg-white/5 blur-card overflow-hidden">
-            <div class="px-4 py-3 text-sm text-white/60">Nearby</div>
-            <div id="nearbyList" class="divide-y divide-white/10"></div>
-          </div>
-        </div>
+    <!-- Primary Meta Tags -->
+    <title>
+      x4pay • Bluetooth Crypto Payments for ESP32 | Tap to Pay with x402
+      Protocol
+    </title>
+    <meta
+      name="title"
+      content="x4pay • Bluetooth Crypto Payments for ESP32 | Tap to Pay with x402 Protocol"
+    />
+    <meta
+      name="description"
+      content="Turn a $4 ESP32 into a crypto-accepting payment device in minutes. Bluetooth (BLE) tap-to-pay with USDC, Base network, mobile apps (Android and iOS coming soon). Open source Arduino libraries and React SDKs."
+    />
+    <meta
+      name="keywords"
+      content="ESP32, crypto payments, Bluetooth BLE, x402 protocol, Arduino, USDC, Base network, tap to pay, cryptocurrency, payment device, IoT payments, Web3, React Native, mobile payments"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="English" />
+    <meta name="author" content="x4pay" />
 
-        <!-- DEVICE STATE (in HOME, no extra tab) -->
-        <div id="deviceState" class="hidden grid gap-4">
-          <!-- Device banner -->
-          <div id="deviceBanner" class="rounded-3xl overflow-hidden border border-white/10">
-            <div id="deviceBannerBg" class="h-24 w-full" style="background:linear-gradient(90deg, rgba(82,139,255,.25), rgba(34,211,238,.2))"></div>
-            <div class="p-4 flex items-center gap-3">
-              <div id="deviceLogo" class="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 grid place-items-center text-lg font-semibold">N</div>
-              <div class="grow">
-                <div id="deviceName" class="font-semibold text-base">—</div>
-                <div id="deviceDesc" class="text-xs text-white/70">—</div>
-              </div>
-              <button id="disconnectBtn" class="h-9 px-4 rounded-full border border-white/20 hover:bg-white/10 disabled:opacity-40" disabled>Disconnect</button>
-            </div>
-          </div>
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://x4pay.org/" />
+    <meta
+      property="og:title"
+      content="x4pay • Bluetooth Crypto Payments for ESP32 | Tap to Pay with x402 Protocol"
+    />
+    <meta
+      property="og:description"
+      content="Turn a $4 ESP32 into a crypto-accepting payment device in minutes. Bluetooth (BLE) tap-to-pay with USDC, Base network, mobile apps (Android and iOS coming soon)."
+    />
+    <meta property="og:image" content="https://x4pay.org/banner.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="x4pay - Bluetooth Crypto Payments for ESP32"
+    />
+    <meta property="og:site_name" content="x4pay" />
+    <meta property="og:locale" content="en_US" />
 
-          <!-- Services -->
-          <div id="servicesWrap" class="grid gap-3"></div>
-        </div>
-      </section>
+    <!-- Twitter Card -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://x4pay.org/" />
+    <meta
+      property="twitter:title"
+      content="x4pay • Bluetooth Crypto Payments for ESP32"
+    />
+    <meta
+      property="twitter:description"
+      content="Turn a $4 ESP32 into a crypto-accepting payment device in minutes. Bluetooth tap-to-pay with USDC on Base network."
+    />
+    <meta property="twitter:image" content="https://x4pay.org/banner.png" />
+    <meta property="twitter:creator" content="@AbhinavBuilds" />
 
-      <!-- WALLET TAB (Base · USDC) -->
-      <section id="page-wallet" class="hidden px-4 py-6 grid gap-6">
-        <div class="rounded-2xl border border-white/10 bg-white/5 blur-card p-4">
-          <div class="flex items-start justify-between">
-            <div>
-              <div class="text-xs text-white/60">Wallet · Base</div>
-              <div class="mt-0.5 text-2xl font-semibold"><span id="usdcBal">$0.00</span> <span class="text-base font-normal">USDC</span></div>
-              <div id="walletAddr" class="text-xs text-white/60 mt-1">—</div>
-            </div>
-            <div class="flex gap-2">
-              <button id="btnDeposit" class="h-9 px-4 rounded-full border border-white/20 hover:bg-white/10">Deposit</button>
-              <button id="btnWithdraw" class="h-9 px-4 rounded-full border border-white/20 hover:bg-white/10">Withdraw</button>
-            </div>
-          </div>
-          <div class="mt-3 grid grid-cols-2 gap-2">
-            <button id="btnRecover" class="h-10 rounded-xl border border-white/15 hover:bg-white/10 text-sm">Recover wallet</button>
-            <button id="btnBackup" class="h-10 rounded-xl border border-white/15 hover:bg-white/10 text-sm">Backup</button>
-          </div>
-        </div>
-      </section>
+    <!-- Additional Meta Tags -->
+    <meta name="theme-color" content="#000000" />
+    <meta name="application-name" content="x4pay" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="x4pay" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
 
-      <!-- SETTINGS TAB (minimal) -->
-      <section id="page-settings" class="hidden px-4 py-6 grid gap-6">
-        <div class="rounded-2xl border border-white/10 bg-white/5 blur-card p-4">
-          <div class="font-semibold mb-1">Settings</div>
-          <p class="text-sm text-white/70">Dark theme is enforced. More settings coming soon.</p>
-        </div>
-      </section>
-    </main>
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://x4pay.org/" />
 
-    <!-- BOTTOM DOCK (Home · Wallet · Settings) -->
-    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md safe-bottom">
-      <div class="mx-4 mb-2 rounded-2xl border border-white/10 bg-black/40 backdrop-blur shadow-2xl">
-        <div class="grid grid-cols-3">
-          <button data-tab="home" class="dock-btn flex flex-col items-center py-2 text-[11px] text-white">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M9 22V12h6v10"/></svg>
-            Home
-          </button>
-          <button data-tab="wallet" class="dock-btn flex flex-col items-center py-2 text-[11px] text-white/70">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7H3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h18V7z"/><path d="M21 7V5a2 2 0 0 0-2-2H7"/></svg>
-            Wallet
-          </button>
-          <button data-tab="settings" class="dock-btn flex flex-col items_center py-2 text-[11px] text-white/70">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09c.7 0 1.31-.4 1.51-1a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06c.5.5 1.2.65 1.82.33.6-.2 1-.81 1-1.51V3a2 2 0 1 1 4 0v.09c0 .7.4 1.31 1 1.51.62.32 1.32.17 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06-.06c-.5.5-.65 1.2-.33 1.82.2.6.81 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.7 0-1.31.4-1.51 1z"/></svg>
-            Settings
-          </button>
-        </div>
-      </div>
-    </nav>
+    <!-- Hreflang for international SEO -->
+    <link rel="alternate" hreflang="en" href="https://x4pay.org/" />
+    <link rel="alternate" hreflang="x-default" href="https://x4pay.org/" />
 
-    <!-- DEVICE CHECKOUT BAR (only when connected + cart>0) -->
-    <div id="checkoutBar" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-md px-4 z-40">
-      <button id="checkoutBtn" class="w-full h-12 rounded-full bg-white text-black font-medium flex items-center justify-center gap-2 shadow-lg">
-        <span id="checkoutLabel">$0.00 — Review & Pay</span>
-      </button>
-    </div>
-  </div>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="logo.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="logo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="logo.png" />
+    <link rel="mask-icon" href="logo.png" color="#000000" />
 
-  <!-- PAYMENT SHEET (USDC · Base) -->
-  <div id="paySheet" class="hidden fixed inset-0 z-50">
-    <div id="sheetBackdrop" class="absolute inset-0 bg-black/70"></div>
-    <div id="sheetPanel" class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md rounded-t-3xl bg-black/60 border-t border-white/10 backdrop-blur-xl sheet-enter">
-      <div class="pt-2"><div class="mx-auto w-12 h-1.5 rounded-full bg-white/20"></div></div>
-      <div class="p-5 grid gap-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 grid place-items-center">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7l10 10-5 5V2l5 5L7 17"/></svg>
-          </div>
-          <div>
-            <div class="text-xs text-white/60">Paying</div>
-            <div id="sheetMerchant" class="font-semibold">—</div>
-          </div>
-          <div class="ml-auto text-right">
-            <div class="text-xs text-white/60">Total</div>
-            <div id="sheetTotal" class="text-xl font-semibold">$0.00</div>
-          </div>
-        </div>
-        <div class="rounded-xl border border-white/15 p-3 flex items-center justify-between text-sm">
-          <span class="text-white/80">Method</span>
-          <span class="font-medium">USDC · Base</span>
-        </div>
-        <div class="rounded-2xl border border-white/15 p-3">
-          <div id="sheetItemsList" class="text-sm space-y-1"></div>
-          <div class="mt-3 grid gap-1 text-sm">
-            <div class="flex items-center justify-between text-white/70"><span>Fees</span><span id="sheetFees">$0.00</span></div>
-            <div class="flex items-center justify-between font-medium"><span>Total</span><span id="sheetTotal2">$0.00</span></div>
-          </div>
-        </div>
-        <button id="sheetConfirm" class="h-12 rounded-full bg-white text-black font-medium">Confirm & Beam</button>
-        <div id="sheetError" class="hidden text-center text-xs text-red-400">Insufficient balance</div>
-        <div id="authWrap" class="hidden grid place-items-center py-3">
-          <div class="relative w-16 h-16">
-            <div class="absolute inset-0 rounded-full border-2 border-white/20"></div>
-            <div class="absolute inset-0 rounded-full border-2 border-white animate-pulse"></div>
-          </div>
-          <div id="authText" class="mt-2 text-xs text-white/70">Authenticating…</div>
-        </div>
-      </div>
-    </div>
-  </div>
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
 
-  <!-- DEPOSIT / WITHDRAW / RECOVER / BACKUP SHEETS -->
-  <div id="modalBackdrop" class="hidden fixed inset-0 z-40 bg-black/70"></div>
-  <div id="depositSheet" class="hidden fixed inset-x-0 bottom-0 z-50 max-w-md mx-auto rounded-t-2xl bg-black/70 backdrop-blur border-t border-white/10 p-5">
-    <div class="text-sm text-white/60">Deposit to</div>
-    <div class="font-semibold">USDC · Base</div>
-    <div class="mt-3 rounded-xl border border-white/15 p-3">
-      <div id="depAddr" class="text-xs break-all">—</div>
-      <div class="mt-2 flex gap-2">
-        <button id="copyAddr" class="h-9 px-3 rounded-lg border border-white/20 hover:bg-white/10 text-sm">Copy address</button>
-        <button id="simulateDeposit" class="h-9 px-3 rounded-lg border border-white/20 hover:bg-white/10 text-sm">Simulate +10 USDC</button>
-      </div>
-    </div>
-    <button class="mt-3 w-full h-11 rounded-full bg-white text-black font-medium" onclick="closeModal()">Done</button>
-  </div>
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
-  <div id="withdrawSheet" class="hidden fixed inset-x-0 bottom-0 z-50 max-w-md mx-auto rounded-t-2xl bg-black/70 backdrop-blur border-t border-white/10 p-5">
-    <div class="text-sm text-white/60">Withdraw</div>
-    <div class="font-semibold">USDC · Base</div>
-    <div class="mt-3 grid gap-2">
-      <input id="wdTo" class="h-11 rounded-xl border border-white/15 bg-black/50 px-3" placeholder="To address (0x...)" />
-      <input id="wdAmt" type="number" min="0" step="0.01" class="h-11 rounded-xl border border-white/15 bg-black/50 px-3" placeholder="Amount in USDC" />
-      <div id="wdErr" class="hidden text-xs text-red-400">—</div>
-    </div>
-    <div class="mt-3 flex gap-2">
-      <button class="h-11 flex-1 rounded-xl border border-white/20 hover:bg-white/10" onclick="closeModal()">Cancel</button>
-      <button id="wdSend" class="h-11 flex-1 rounded-xl bg_white text-black font-medium">Send</button>
-    </div>
-  </div>
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "x4pay",
+        "description": "Bluetooth crypto payment system for ESP32 devices using x402 protocol",
+        "url": "https://x4pay.org",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Android, iOS, Web",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "creator": {
+          "@type": "Organization",
+          "name": "x4pay"
+        },
+        "keywords": "ESP32, crypto payments, Bluetooth BLE, x402 protocol, Arduino, USDC, Base network",
+        "downloadUrl": "https://github.com/x4pay/mobile-app"
+      }
+    </script>
 
-  <div id="recoverSheet" class="hidden fixed inset-x-0 bottom-0 z-50 max-w-md mx-auto rounded-t-2xl bg-black/70 backdrop-blur border-t border-white/10 p-5">
-    <div class="font-semibold mb-1">Recover wallet</div>
-    <p class="text-xs text-white/70">Paste your 12/24‑word phrase or upload a backup file. (Local mock only.)</p>
-    <textarea id="rcPhrase" class="mt-3 w-full h-28 rounded-xl border border-white/15 bg-black/50 p-3 text-sm" placeholder="seed phrase or JSON…"></textarea>
-    <div class="mt-3 flex gap-2">
-      <button class="h-11 flex-1 rounded-xl border border-white/20 hover:bg-white/10" onclick="closeModal()">Cancel</button>
-      <button id="rcRestore" class="h-11 flex-1 rounded-xl bg-white text-black font-medium">Restore</button>
-    </div>
-  </div>
-
-  <div id="backupSheet" class="hidden fixed inset-x-0 bottom-0 z-50 max-w-md mx-auto rounded-t-2xl bg-black/70 backdrop-blur border-t border-white/10 p-5">
-    <div class="font-semibold mb-1">Backup wallet</div>
-    <p class="text-xs text-white/70">Download an encrypted backup (mock JSON). Keep it safe.</p>
-    <div class="mt-3 flex gap-2">
-      <button class="h-11 flex-1 rounded-xl border border-white/20 hover:bg-white/10" onclick="closeModal()">Close</button>
-      <button id="bkDownload" class="h-11 flex-1 rounded-xl bg-white text-black font-medium">Download backup</button>
-    </div>
-  </div>
-
-  <script>
-    // ===== Mock data / helpers =====
-    const SERVICES = [
-      { id:'bike', name:'Bike', priceUSD:2.5, unit:'30 min', icon:bikeIcon },
-      { id:'coffee', name:'Coffee', priceUSD:1.7, unit:'cup', icon:coffeeIcon },
-      { id:'charge', name:'Charge', priceUSD:0.9, unit:'15 min', icon:zapIcon },
-      { id:'snack', name:'Snack', priceUSD:1.2, unit:'item', icon:snackIcon }
-    ];
-    const NEARBY = [
-      { id:'esp32-01', name:'Node Aster', rssi:-58, services:['coffee','snack'], logo:'A', banner:['#528bff','#22d3ee'], desc:'Campus café node — tap to pay for snacks & coffee.' },
-      { id:'esp32-02', name:'Dock Helio', rssi:-63, services:['bike'], logo:'H', banner:['#22d3ee','#eab308'], desc:'Bike dock 7 — rent a bike in seconds.' },
-      { id:'esp32-03', name:'Hub Ion', rssi:-72, services:['charge','snack'], logo:'I', banner:['#a78bfa','#22d3ee'], desc:'Charging hub — pay-as-you-go power.' },
-    ];
-    const fmtUSD = n => `$${n.toFixed(2)}`;
-    const short = a => a.slice(0,6) + '…' + a.slice(-4);
-
-    // ===== State =====
-    let connected=false, device=null, available=[], cart=[];
-    let wallet = { chain:'Base', usdc: 120.00, address: '0xA1b2c3D4e5F6a7B8c9d0AaBbCcDdEeFf11223344' };
-
-    // ===== Tabs (Home · Wallet · Settings) =====
-    const pages = { home: qs('#page-home'), wallet: qs('#page-wallet'), settings: qs('#page-settings') };
-    const dockBtns = document.querySelectorAll('.dock-btn');
-    function setTab(name){ Object.entries(pages).forEach(([k,el])=> el.classList.toggle('hidden', k!==name)); dockBtns.forEach(b=> b.classList.toggle('text-white', b.dataset.tab===name)); scrollTo({top:0, behavior:'smooth'}); }
-    dockBtns.forEach(b=> b.addEventListener('click', ()=> setTab(b.dataset.tab)));
-
-    // ===== Scan vs Device states (Home) =====
-    const scanState = qs('#scanState'); const deviceState = qs('#deviceState');
-    const orbit = qs('#orbitLayer'); const nearbyList = qs('#nearbyList'); const presenceText = qs('#presenceText'); const presenceCount = qs('#presenceCount'); const presenceDot = qs('#presenceDot');
-    const deviceName = qs('#deviceName'); const deviceDesc = qs('#deviceDesc'); const deviceLogo = qs('#deviceLogo'); const deviceBannerBg = qs('#deviceBannerBg'); const disconnectBtn = qs('#disconnectBtn');
-
-    renderOrbit(); renderNearby(); renderWallet();
-    function renderOrbit(){
-      orbit.innerHTML=''; const cx=160, cy=160, r=120;
-      NEARBY.forEach((d,i)=>{
-        const button = document.createElement('button');
-        const angle = (i/NEARBY.length)*Math.PI*2;
-        button.className = 'absolute -translate-x-1/2 -translate-y-1/2 px-3 py-1.5 rounded-full border border-white/20 bg-white/10 text-xs hover:bg-white/15 disabled:opacity-40 disabled:cursor-not-allowed';
-        button.style.left = (cx + Math.cos(angle)*r)+'px';
-        button.style.top  = (cy + Math.sin(angle)*r)+'px';
-        button.innerHTML = `${signalBars(rssiBars(d.rssi))} <span class='ml-1'>${d.name}</span>`;
-        if(connected && device && d.id !== device.id){ button.disabled = true; }
-        button.onclick = ()=> connected ? null : connect(d);
-        orbit.appendChild(button);
-      });
-      presenceText.textContent = connected ? `Connected to ${device?.name||''}` : 'Devices around you';
-      presenceCount.textContent = NEARBY.length;
-    }
-
-    function renderNearby(){
-      nearbyList.innerHTML='';
-      NEARBY.sort((a,b)=>b.rssi-a.rssi).forEach(d=>{
-        const row = document.createElement('button');
-        row.className = 'w-full px-4 py-3 flex items-center justify-between hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed';
-        row.innerHTML = `
-          <div class='flex items-center gap-3'>
-            <div class='w-10 h-10 rounded-xl grid place-items-center bg-white/10 border border-white/10'>${bluetoothIcon()}</div>
-            <div><div class='font-medium'>${d.name}</div><div class='text-xs text-white/60'>${d.id}</div></div>
-          </div>
-          ${signalBars(rssiBars(d.rssi))}`;
-        if(connected && device && d.id !== device.id){ row.disabled = true; }
-        row.onclick = ()=> connected ? null : connect(d);
-        nearbyList.appendChild(row);
-      })
-    }
-
-    function rssiBars(v){ if(v>-60) return 4; if(v>-67) return 3; if(v>-75) return 2; return 1 }
-
-    // ===== Connect / Disconnect & Services =====
-    const servicesWrap = qs('#servicesWrap');
-    function connect(d){
-      connected=true; device=d; available=d.services;
-      presenceDot.className='inline-block w-1.5 h-1.5 rounded-full bg-emerald-400';
-      // banner + logo + description
-      deviceName.textContent=d.name; deviceDesc.textContent=d.desc||'';
-      deviceLogo.textContent=(d.logo||'X').toString().slice(0,1).toUpperCase();
-      deviceBannerBg.style.background = `linear-gradient(90deg, ${d.banner?.[0]||'#528bff'}, ${d.banner?.[1]||'#22d3ee'})`;
-      // toggle states
-      scanState.classList.add('hidden'); deviceState.classList.remove('hidden');
-      disconnectBtn.disabled = false; disconnectBtn.onclick = disconnect;
-      renderServices(); updateCheckoutBar(); renderOrbit(); renderNearby();
-    }
-    function disconnect(){
-      connected=false; device=null; available=[]; cart=[];
-      presenceDot.className='inline-block w-1.5 h-1.5 rounded-full bg-white/60';
-      scanState.classList.remove('hidden'); deviceState.classList.add('hidden');
-      servicesWrap.innerHTML=''; updateCheckoutBar(); renderOrbit(); renderNearby();
-    }
-
-    function getQty(id){ const it=cart.find(c=>c.id===id); return it?it.qty:0 }
-    function setQty(id, name, priceUSD, qty){ const i=cart.findIndex(c=>c.id===id); if(qty<=0){ if(i>-1) cart.splice(i,1);} else if(i>-1){ cart[i].qty=qty } else { cart.push({id,name,priceUSD,qty}) } renderServices(); updateCheckoutBar(); }
-
-    function renderServices(){
-      servicesWrap.innerHTML='';
-      const list = SERVICES.filter(s=> available.includes(s.id));
-      list.forEach(svc=>{
-        const qty = getQty(svc.id);
-        const card = document.createElement('div');
-        card.className = 'rounded-2xl border border-white/10 bg-white/5 blur-card p-4 flex items-center justify-between';
-        card.innerHTML = `
-          <div class='flex items-center gap-3'>
-            <div class='w-11 h-11 rounded-2xl bg-white/10 border border-white/10 grid place-items-center'>${svc.icon()}</div>
-            <div>
-              <div class='font-semibold'>${svc.name}</div>
-              <div class='text-xs text-white/60'>${svc.unit}</div>
-            </div>
-          </div>
-          <div class='text-right'>
-            <div class='font-semibold'>${fmtUSD(svc.priceUSD)}</div>
-            <div class='mt-1' data-role='control'></div>
-          </div>`;
-        const ctrl = card.querySelector('[data-role="control"]');
-        ctrl.innerHTML = qty===0 ? `<button class='h-9 px-4 rounded-full border border-white/20 hover:bg-white/10'>Add</button>` : stepper(qty);
-        if(qty===0){ ctrl.querySelector('button').onclick = ()=> setQty(svc.id, svc.name, svc.priceUSD, 1) }
-        else {
-          const dec = ctrl.querySelector('[data-act="dec"]');
-          const inc = ctrl.querySelector('[data-act="inc"]');
-          dec.onclick = ()=> setQty(svc.id, svc.name, svc.priceUSD, qty-1);
-          inc.onclick = ()=> setQty(svc.id, svc.name, svc.priceUSD, qty+1);
+    <!-- Organization Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "x4pay",
+        "url": "https://x4pay.org",
+        "description": "Open source Bluetooth crypto payment system for ESP32 and IoT devices",
+        "foundingDate": "2024",
+        "sameAs": ["https://github.com/x4pay", "https://app.x4pay.org"],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "Technical Support",
+          "url": "https://github.com/x4pay"
         }
-        servicesWrap.appendChild(card);
-      })
+      }
+    </script>
+
+    <!-- FAQ Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is x4pay?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "x4pay is an open-source system that turns ESP32 devices into crypto payment receivers using Bluetooth (BLE) and the x402 protocol."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What cryptocurrencies are supported?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Currently supports USDC on Base network. The system uses the x402 protocol for payment verification."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How much does an ESP32 cost?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "ESP32 development boards typically cost around $4-8 USD, making them an affordable option for crypto payment devices."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Are mobile apps available?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Both Android and iOS apps are coming soon. Currently available as a web app that works in browsers supporting Web Bluetooth API."
+            }
+          }
+        ]
+      }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      html,
+      body {
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI,
+          Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji",
+          "Segoe UI Symbol";
+      }
+      /* subtle scrollbar */
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+      }
+      .glass {
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      pre code {
+        white-space: pre;
+      }
+    </style>
+  </head>
+  <body class="h-full bg-black text-white antialiased selection:bg-white/10">
+    <!-- Decorative background -->
+    <div
+      aria-hidden="true"
+      class="pointer-events-none fixed inset-0 overflow-hidden"
+    >
+      <div
+        class="absolute -top-40 left-1/2 h-[42rem] w-[80rem] -translate-x-1/2 rounded-full bg-white/5 blur-3xl"
+      ></div>
+      <div
+        class="absolute -bottom-40 left-[10%] h-[32rem] w-[32rem] rounded-full bg-violet-500/10 blur-3xl"
+      ></div>
+      <div
+        class="absolute -bottom-20 right-[5%] h-[28rem] w-[28rem] rounded-full bg-cyan-500/10 blur-3xl"
+      ></div>
+    </div>
+
+    <!-- Page shell -->
+    <div class="relative min-h-screen flex flex-col">
+      <!-- Header -->
+      <header
+        class="sticky top-0 z-40 border-b border-white/10 bg-black/60 glass"
+      >
+        <div class="mx-auto max-w-7xl px-6 py-4">
+          <div class="flex items-center justify-between gap-6">
+            <a href="#top" class="group inline-flex items-center gap-3">
+              <img src="banner.png" alt="x4pay logo" class="h-8 w-auto" />
+            </a>
+            <nav
+              class="hidden md:flex items-center gap-8 text-sm text-white/70"
+            >
+              <a class="hover:text-white transition" href="#downloads"
+                >Downloads</a
+              >
+              <a class="hover:text-white transition" href="#how"
+                >How it works</a
+              >
+              <a class="hover:text-white transition" href="#developers"
+                >Developers</a
+              >
+              <a class="hover:text-white transition" href="#diy"
+                >DIY Projects</a
+              >
+
+              <a class="hover:text-white transition" href="#technical"
+                >Technical</a
+              >
+
+              <a class="hover:text-white transition" href="#faq">FAQ</a>
+            </nav>
+            <div class="hidden sm:flex items-center gap-3">
+              <span
+                title="Android — coming soon"
+                class="rounded-full px-4 py-2 text-sm ring-1 ring-white/10 text-white/40 cursor-not-allowed select-none"
+                >Android</span
+              >
+              <span
+                title="iOS — coming soon"
+                class="rounded-full px-4 py-2 text-sm ring-1 ring-white/10 text-white/40 cursor-not-allowed select-none"
+                >iOS</span
+              >
+              <span
+                title="Launch App — coming soon"
+                class="rounded-full bg-white/10 text-white/40 px-4 py-2 text-sm font-medium cursor-not-allowed select-none"
+                >Launch App</span
+              >
+            </div>
+            <a
+              href="https://x.com/AbhinavBuilds"
+              target="_blank"
+              rel="noopener"
+              class="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-xl ring-1 ring-white/15 text-white/60 hover:text-white hover:ring-white/30 transition"
+              title="Follow us on X"
+            >
+              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                />
+              </svg>
+            </a>
+            <button
+              id="menuBtn"
+              class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl ring-1 ring-white/15"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- mobile menu -->
+        <div
+          id="mobileMenu"
+          class="md:hidden hidden border-t border-white/10 bg-black/70"
+        >
+          <div
+            class="mx-auto max-w-7xl px-6 py-4 grid gap-3 text-sm text-white/80"
+          >
+            <a href="#how" class="py-1">How it works</a>
+            <a href="#technical" class="py-1">Technical</a>
+            <a href="#developers" class="py-1">Developers</a>
+            <a href="#diy" class="py-1">DIY Projects</a>
+            <a href="#downloads" class="py-1">Downloads</a>
+            <a href="#faq" class="py-1">FAQ</a>
+            <div class="h-px bg-white/10 my-2"></div>
+            <span
+              class="rounded-xl px-4 py-2 ring-1 ring-white/10 text-white/40"
+              >Android — coming soon</span
+            >
+            <span
+              class="rounded-xl px-4 py-2 ring-1 ring-white/10 text-white/40"
+              >iOS — coming soon</span
+            >
+            <span
+              class="rounded-xl bg-white/10 text-white/40 px-4 py-2 font-medium cursor-not-allowed select-none"
+              >Launch App — coming soon</span
+            >
+          </div>
+        </div>
+      </header>
+
+      <main id="top" class="flex-1">
+        <!-- Hero -->
+        <section class="relative">
+          <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24">
+            <div class="grid items-center gap-12 lg:grid-cols-2">
+              <div class="space-y-8">
+                <p class="text-xs uppercase tracking-[0.2em] text-white/50">
+                  Payments for machines
+                </p>
+                <h1
+                  class="text-4xl/tight sm:text-5xl/tight font-semibold tracking-tight"
+                >
+                  Tap to pay with <span class="text-white">x402</span>
+                </h1>
+                <p class="text-white/70 text-lg max-w-prose">
+                  x402 is a payment protocol for HTTPS payments. This project
+                  enables x402 over Bluetooth (BLE) with tap to pay. The Arduino
+                  libraries let you accept USDC payments from mobile and web
+                  apps using Bluetooth (BLE). All code is open source.
+                </p>
+
+                <!-- Countdown Timer -->
+                <div
+                  class="rounded-2xl border border-white/15 bg-white/5 p-6 backdrop-blur-sm"
+                >
+                  <div class="text-center">
+                    <p class="text-sm text-white/70 mb-3">Launch Countdown</p>
+                    <div
+                      id="countdown"
+                      class="grid grid-cols-4 gap-4 max-w-sm mx-auto"
+                    >
+                      <div class="text-center">
+                        <div
+                          id="days"
+                          class="text-2xl sm:text-3xl font-bold text-white"
+                        >
+                          --
+                        </div>
+                        <div
+                          class="text-xs text-white/60 uppercase tracking-wide"
+                        >
+                          Days
+                        </div>
+                      </div>
+                      <div class="text-center">
+                        <div
+                          id="hours"
+                          class="text-2xl sm:text-3xl font-bold text-white"
+                        >
+                          --
+                        </div>
+                        <div
+                          class="text-xs text-white/60 uppercase tracking-wide"
+                        >
+                          Hours
+                        </div>
+                      </div>
+                      <div class="text-center">
+                        <div
+                          id="minutes"
+                          class="text-2xl sm:text-3xl font-bold text-white"
+                        >
+                          --
+                        </div>
+                        <div
+                          class="text-xs text-white/60 uppercase tracking-wide"
+                        >
+                          Minutes
+                        </div>
+                      </div>
+                      <div class="text-center">
+                        <div
+                          id="seconds"
+                          class="text-2xl sm:text-3xl font-bold text-white"
+                        >
+                          --
+                        </div>
+                        <div
+                          class="text-xs text-white/60 uppercase tracking-wide"
+                        >
+                          Seconds
+                        </div>
+                      </div>
+                    </div>
+                    <p class="text-xs text-white/50 mt-3">
+                      October 26, 2025 at 12:00 PM
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3">
+                  <span
+                    title="Launch App — coming soon"
+                    class="inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium bg-white/10 text-white/40 cursor-not-allowed select-none"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      class="h-4 w-4"
+                    >
+                      <path
+                        d="M13 3h8v8h-2V6.414l-9.293 9.293-1.414-1.414L17.586 5H13V3Z"
+                      />
+                      <path d="M5 5h6v2H7v10h10v-4h2v6H5V5Z" />
+                    </svg>
+                    Launch App — coming soon
+                  </span>
+                  <span
+                    class="inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium ring-1 ring-white/10 text-white/40 cursor-not-allowed select-none"
+                    title="Android — coming soon"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      class="h-4 w-4"
+                    >
+                      <path
+                        d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85a.637.637 0 0 0-.83.22l-1.88 3.24a11.43 11.43 0 0 0-8.94 0L5.65 5.67a.637.637 0 0 0-.83-.22c-.3.16-.42.54-.26.85L6.4 9.48C3.3 11.25 1.28 14.44 1 18h22c-.28-3.56-2.3-6.75-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 2.5 0 1.25 1.25 0 0 1-2.5 0zm7.5 0a1.25 1.25 0 1 1 2.5 0 1.25 1.25 0 0 1-2.5 0z"
+                      />
+                    </svg>
+                    Android — coming soon
+                  </span>
+                  <span
+                    class="inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium ring-1 ring-white/10 text-white/40 cursor-not-allowed select-none"
+                    title="iOS — coming soon"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      class="h-4 w-4"
+                    >
+                      <path
+                        d="M16.365 1.43c.028 1.02-.375 1.997-1.078 2.74-.728.77-1.908 1.36-2.97 1.282-.127-1 .393-2.03 1.067-2.74.728-.77 1.992-1.33 2.98-1.282ZM20.5 17.09c-.45 1.03-.992 2.03-1.63 2.97-.86 1.25-1.57 2.11-2.54 2.12-.96.01-1.28-.68-2.39-.68-1.12 0-1.47.66-2.4.69-.96.03-1.69-1-2.55-2.25-1.39-2.02-2.46-5.7-1.03-8.2.71-1.25 1.98-2.05 3.39-2.07.99-.02 1.93.69 2.39.69.45 0 1.56-.86 2.64-.74.45.02 1.72.18 2.54 1.35-.07.05-1.51.88-1.5 2.64.02 2.1 1.84 2.8 1.86 2.8Z"
+                      />
+                    </svg>
+                    iOS — coming soon
+                  </span>
+                  <span
+                    title="View on GitHub — coming soon"
+                    class="inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium ring-1 ring-white/10 text-white/40 cursor-not-allowed select-none"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      class="h-4 w-4"
+                    >
+                      <path
+                        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.30.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                      />
+                    </svg>
+                    View on GitHub — coming soon
+                  </span>
+                </div>
+                <div class="flex items-center gap-6 pt-3 text-sm text-white/50">
+                  <div class="flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full bg-cyan-400"></span>
+                    Bluetooth (BLE) payments
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                    Microcontroller Arduino library
+                  </div>
+                </div>
+              </div>
+
+              <!-- iPhone Mockup -->
+              <div class="relative">
+                <div class="mx-auto w-full max-w-sm">
+                  <div
+                    class="relative aspect-[9/19] rounded-[2.5rem] border-2 border-white/20 bg-gradient-to-b from-white/10 to-white/5 shadow-[0_0_60px_0_rgba(255,255,255,0.12)] overflow-hidden"
+                  >
+                    <!-- iPhone notch -->
+                    <div
+                      class="absolute top-2 left-1/2 transform -translate-x-1/2 w-20 h-6 bg-black rounded-full z-10"
+                    ></div>
+
+                    <!-- Screen content -->
+                    <div
+                      class="absolute inset-0 mt-8 mb-4 mx-3 rounded-[2rem] bg-black/90 ring-1 ring-white/10 flex flex-col items-center justify-center text-center p-6"
+                    >
+                      <!-- App logo -->
+                      <div class="mb-6">
+                        <img
+                          src="logo.png"
+                          alt="x4pay logo"
+                          class="h-16 w-auto mx-auto mb-3 opacity-80"
+                        />
+                        <h3 class="text-white font-semibold text-lg">x4 Pay</h3>
+                      </div>
+
+                      <!-- Coming soon message -->
+                      <div class="space-y-3">
+                        <h4 class="text-white/90 font-medium text-base">
+                          Mobile App
+                        </h4>
+                        <p class="text-white/60 text-sm">Coming Soon</p>
+                        <div class="flex space-x-2 justify-center mt-4">
+                          <div
+                            class="w-2 h-2 bg-white/40 rounded-full animate-pulse"
+                          ></div>
+                          <div
+                            class="w-2 h-2 bg-white/40 rounded-full animate-pulse"
+                            style="animation-delay: 0.2s"
+                          ></div>
+                          <div
+                            class="w-2 h-2 bg-white/40 rounded-full animate-pulse"
+                            style="animation-delay: 0.4s"
+                          ></div>
+                        </div>
+                      </div>
+
+                      <!-- Bottom features -->
+                      <div class="mt-8 space-y-2 text-white/50 text-xs">
+                        <div>Bluetooth BLE Payments</div>
+                        <div>USDC on EVMs</div>
+                        <div>ESP32 Integration</div>
+                      </div>
+                    </div>
+
+                    <!-- iPhone home indicator -->
+                    <div
+                      class="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-white/30 rounded-full"
+                    ></div>
+                  </div>
+                  <p class="mt-4 text-center text-xs text-white/50">
+                    Mobile app preview - launching soon
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Downloads -->
+        <section id="downloads" class="relative border-t border-white/10">
+          <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24">
+            <div class="max-w-3xl">
+              <h2 class="text-3xl sm:text-4xl font-semibold tracking-tight">
+                Downloads
+              </h2>
+              <p class="text-white/70 mt-3">Arduino libraries and apps.</p>
+              <div class="mt-6 grid gap-3 sm:grid-cols-2">
+                <div
+                  class="rounded-2xl border border-white/10 bg-white/5 p-5 flex items-center justify-between"
+                >
+                  <div>
+                    <h3 class="font-medium text-white/60">
+                      X402-Aurdino Library
+                    </h3>
+                    <p class="text-sm text-white/40">Coming soon</p>
+                  </div>
+                  <span
+                    class="text-xs rounded-full px-3 py-1 ring-1 ring-white/10 text-white/40"
+                    >Soon</span
+                  >
+                </div>
+                <div
+                  class="rounded-2xl border border-white/10 bg-white/5 p-5 flex items-center justify-between"
+                >
+                  <div>
+                    <h3 class="font-medium text-white/60">
+                      X402-BLE-Aurdino Library
+                    </h3>
+                    <p class="text-sm text-white/40">Coming soon</p>
+                  </div>
+                  <span
+                    class="text-xs rounded-full px-3 py-1 ring-1 ring-white/10 text-white/40"
+                    >Soon</span
+                  >
+                </div>
+                <div
+                  class="rounded-2xl border border-white/10 bg-white/5 p-5 flex items-center justify-between"
+                >
+                  <div>
+                    <h3 class="font-medium text-white/60">Web App</h3>
+                    <p class="text-sm text-white/40">Coming soon</p>
+                  </div>
+                  <span
+                    class="text-xs rounded-full px-3 py-1 ring-1 ring-white/10 text-white/40"
+                    >Soon</span
+                  >
+                </div>
+                <div
+                  id="android"
+                  class="rounded-2xl border border-white/10 bg-white/5 p-5 flex items-center justify-between"
+                >
+                  <div>
+                    <h3 class="font-medium text-white/60">Android APK</h3>
+                    <p class="text-sm text-white/40">Coming soon</p>
+                  </div>
+                  <span
+                    class="text-xs rounded-full px-3 py-1 ring-1 ring-white/10 text-white/40"
+                    >Soon</span
+                  >
+                </div>
+                <div
+                  class="rounded-2xl border border-white/10 bg-white/5 p-5 flex items-center justify-between"
+                >
+                  <div>
+                    <h3 class="font-medium text-white/60">iOS</h3>
+                    <p class="text-sm text-white/40">Coming soon</p>
+                  </div>
+                  <span
+                    class="text-xs rounded-full px-3 py-1 ring-1 ring-white/10 text-white/40"
+                    >Soon</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- How it works -->
+        <section id="how" class="relative border-t border-white/10">
+          <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24">
+            <div class="grid gap-10 lg:grid-cols-3">
+              <div class="lg:col-span-1 space-y-4">
+                <h2 class="text-3xl sm:text-4xl font-semibold tracking-tight">
+                  How it works
+                </h2>
+                <p class="text-white/70">
+                  Install the X402 Arduino library on your ESP32. The device
+                  advertises payment info over Bluetooth (BLE). The mobile app
+                  or web app connects and sends a payment. The device verifies
+                  the payment using the x402 facilitator API.
+                </p>
+              </div>
+              <div class="lg:col-span-2 grid sm:grid-cols-2 gap-4">
+                <article
+                  class="rounded-2xl border border-white/15 bg-white/5 p-5"
+                >
+                  <h3 class="font-medium">1) Broadcast</h3>
+                  <p class="text-white/70 text-sm mt-1">
+                    ESP32 advertises over Bluetooth (BLE) using Nordic UART
+                    service UUID 6e400002-b5a3-f393-e0a9-e50e24dcca9e.
+                  </p>
+                </article>
+                <article
+                  class="rounded-2xl border border-white/15 bg-white/5 p-5"
+                >
+                  <h3 class="font-medium">2) Connect</h3>
+                  <p class="text-white/70 text-sm mt-1">
+                    App scans for devices, connects via GATT, subscribes to TX
+                    characteristic for data transfer.
+                  </p>
+                </article>
+                <article
+                  class="rounded-2xl border border-white/15 bg-white/5 p-5"
+                >
+                  <h3 class="font-medium">3) Exchange</h3>
+                  <p class="text-white/70 text-sm mt-1">
+                    Device sends payment requirements JSON, app responds with
+                    signed transaction payload.
+                  </p>
+                </article>
+                <article
+                  class="rounded-2xl border border-white/15 bg-white/5 p-5"
+                >
+                  <h3 class="font-medium">4) Verify</h3>
+                  <p class="text-white/70 text-sm mt-1">
+                    ESP32 sends payload to x402.org facilitator API over WiFi,
+                    receives transaction hash confirmation.
+                  </p>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Developers -->
+        <section id="developers" class="relative border-t border-white/10">
+          <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24">
+            <div class="max-w-3xl space-y-6">
+              <h2 class="text-3xl sm:text-4xl font-semibold tracking-tight">
+                Developers
+              </h2>
+              <p class="text-white/70 text-lg">
+                X402-Aurdino: payment verification for ESP32. X402-BLE-Aurdino:
+                Bluetooth (BLE) server for ESP32. React Native mobile app and
+                React web app connect and send payments.
+              </p>
+
+              <!-- Tabs -->
+              <div class="flex items-center gap-2 text-sm flex-wrap">
+                <button
+                  data-tab="arduino"
+                  class="tab-btn rounded-full px-4 py-2 ring-1 ring-white/20 bg-white/10"
+                >
+                  X402-Aurdino (Core)
+                </button>
+                <button
+                  data-tab="ble"
+                  class="tab-btn rounded-full px-4 py-2 ring-1 ring-white/20"
+                >
+                  x4pay-core (BLE)
+                </button>
+                <button
+                  data-tab="reactnative"
+                  class="tab-btn rounded-full px-4 py-2 ring-1 ring-white/20"
+                >
+                  React Native (mobile)
+                </button>
+                <button
+                  data-tab="react"
+                  class="tab-btn rounded-full px-4 py-2 ring-1 ring-white/20"
+                >
+                  React (web app)
+                </button>
+              </div>
+
+              <!-- Panels -->
+              <div class="tab-panel" data-panel="arduino">
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-5">
+                  <div class="flex items-center justify-between mb-3">
+                    <p class="font-medium">ESP32 Basic Payment Verification</p>
+                    <button
+                      class="copy-btn text-xs text-white/70 hover:text-white"
+                      data-copy-target="#code-arduino"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <pre
+                    class="overflow-auto rounded-xl bg-black/50 p-4 text-sm leading-6"
+                  ><code id="code-arduino">#include &lt;WiFi.h&gt;
+#include "X402Aurdino.h"
+
+const String network = "base-sepolia";
+const String payTo = "0xa78eD39F695615315458Bb066ac9a5F28Dfd65FE";
+const String maxAmountRequired = "1000000"; // 1 USDC in micro-units
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin("yourWiFi", "password");
+  
+  // Build payment requirements
+  String requirements = buildDefaultPaymentRementsJson(
+    network, payTo, maxAmountRequired, 
+    "https://logo.url", "Device description"
+  );
+  
+  Serial.println("Payment Requirements:");
+  Serial.println(requirements);
+}
+
+void loop() {
+  // Handle incoming payment payloads and verify them
+  if (Serial.available()) {
+    String paymentJson = Serial.readString();
+    
+    // Create PaymentPayload object
+    PaymentPayload payload(paymentJson);
+    
+    // Verify payment using x402 facilitator API
+    bool isValid = verifyPayment(payload, requirements);
+    
+    if (isValid) {
+      Serial.println("Payment verified successfully!");
+      // Add your device logic here (e.g., activate relay)
     }
+  }
+}
+</code></pre>
+                </div>
+              </div>
 
-    function stepper(qty){
-      return `<div class='inline-flex items-center rounded-full border border-white/25 overflow-hidden'>
-        <button data-act='dec' class='w-9 h-9 grid place-items-center hover:bg-white/10'>−</button>
-        <div class='min-w-8 text-center text-sm font-medium px-2'>${qty}</div>
-        <button data-act='inc' class='w-9 h-9 grid place-items-center hover:bg-white/10'>+</button>
-      </div>`
+              <div class="tab-panel hidden" data-panel="ble">
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-5">
+                  <div class="flex items-center justify-between mb-3">
+                    <p class="font-medium">
+                      ESP32 Bluetooth (BLE) Server with X402 Support
+                    </p>
+                    <button
+                      class="copy-btn text-xs text-white/70 hover:text-white"
+                      data-copy-target="#code-ble"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <pre
+                    class="overflow-auto rounded-xl bg-black/50 p-4 text-sm leading-6"
+                  ><code id="code-ble">#include &lt;WiFi.h&gt;
+#include "X402Aurdino.h"
+#include "x4pay-core.h"
+
+const String DEVICE_NAME = "x402-Coffee-Machine";
+const String NETWORK = "base-sepolia";
+const String PRICE = "1500000"; // 1.5 USDC
+const String PAY_TO = "0xa78eD39F695615315458Bb066ac9a5F28Dfd65FE";
+const String LOGO = "https://example.com/logo.jpg";
+const String BANNER = "https://example.com/banner.jpg";
+const String DESCRIPTION = "Smart coffee machine accepting crypto payments";
+
+const String options[] = {"Espresso", "Latte", "Cappuccino", "Americano"};
+X402Ble* device;
+
+void onPaymentReceived(const std::vector&lt;String&gt;& selectedOptions, const String& context) {
+  Serial.println("Payment received! Making coffee...");
+  // Add your coffee machine control logic here
+  for (const auto& option : selectedOptions) {
+    Serial.println("Selected: " + option);
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin("yourWiFi", "password");
+  
+  // Create Bluetooth (BLE) payment device
+  device = new X402Ble(DEVICE_NAME, PRICE, PAY_TO, NETWORK, 
+                       LOGO, DESCRIPTION, BANNER);
+  
+  // Enable advanced features
+  device->enableRecuring(30);           // 30 second recurring payments
+  device->enableOptions(options, 4);    // Coffee options
+  device->allowCustomised();            // Allow custom messages
+  
+  // Set payment callback
+  device->setOnPay(onPaymentReceived);
+  
+  // Set dynamic pricing callback
+  device->setDynamicPriceCallback([](const std::vector&lt;String&gt;& opts, const String& ctx) {
+    // Premium drinks cost more
+    for (const auto& opt : opts) {
+      if (opt == "Latte" || opt == "Cappuccino") return "2000000"; // 2 USDC
     }
+    return "1500000"; // Default 1.5 USDC
+  });
+  
+  device->begin();
+  Serial.println("Bluetooth (BLE) device started!");
+}
+}
 
-    // ===== Wallet (Base · USDC) =====
-    const usdcBal = qs('#usdcBal'); const walletAddr = qs('#walletAddr');
-    function renderWallet(){ usdcBal.textContent = fmtUSD(wallet.usdc); walletAddr.textContent = `${short(wallet.address)} · Base`; qs('#depAddr').textContent = wallet.address; }
+void loop() {
+  // Check payment status
+  if (device->getStatusAndReset()) {
+    Serial.println("Payment received! Dispensing coffee...");
+    // Activate coffee machine here
+  }
+}
+</code></pre>
+                </div>
+              </div>
 
-    // ===== Checkout bar in device view =====
-    const checkoutBar = qs('#checkoutBar'); const checkoutBtn = qs('#checkoutBtn'); const checkoutLabel = qs('#checkoutLabel');
-    checkoutBtn.addEventListener('click', openSheet);
+              <div class="tab-panel hidden" data-panel="reactnative">
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-5">
+                  <div class="flex items-center justify-between mb-3">
+                    <p class="font-medium">React Native Mobile App (excerpt)</p>
+                    <button
+                      class="copy-btn text-xs text-white/70 hover:text-white"
+                      data-copy-target="#code-rn"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <pre
+                    class="overflow-auto rounded-xl bg-black/50 p-4 text-sm leading-6"
+                  ><code id="code-rn">import { BleManager } from 'react-native-ble-plx';
+import { createWalletClient, http } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { base, baseSepolia } from 'viem/chains';
+import { signPaymentHeader } from '@coinbase/x402/client';
 
-    function totals(){ const subtotal = cart.reduce((s,i)=> s + i.priceUSD*i.qty, 0); const fees = subtotal*0.015; const total=subtotal+fees; return {subtotal, fees, total} }
-    function updateCheckoutBar(){
-      if(!connected){ checkoutBar.classList.add('hidden'); return; }
-      const { total } = totals(); const count = cart.reduce((a,b)=>a+b.qty,0);
-      if(count>0){ checkoutBar.classList.remove('hidden'); checkoutLabel.textContent = `${fmtUSD(total)} — Review & Pay`; }
-      else { checkoutBar.classList.add('hidden'); }
+// BLE UUIDs for X402 Nordic UART service
+const SERVICE_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+const TX_CHAR_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+const RX_CHAR_UUID = "6e400004-b5a3-f393-e0a9-e50e24dcca9e";
+
+const manager = new BleManager();
+
+// Scan for devices and auto-connect to nearby ones
+manager.startDeviceScan([SERVICE_UUID], null, (error, device) => {
+  if (device && device.rssi >= -30) { // Very close device
+    connectToDevice(device);
+  }
+});
+
+const handlePayment = async (device, options, customText) => {
+  // Get payment requirements from device
+  const requirements = await getPaymentRequirements(device);
+  
+  // Create payment payload with user's encrypted wallet
+  const privateKey = await getDecryptedPrivateKey(userPin);
+  const account = privateKeyToAccount(privateKey);
+  const walletClient = createWalletClient({
+    account, chain: baseSepolia, transport: http()
+  });
+  
+  // Sign payment with x402 protocol
+  const signedPayment = await signPaymentHeader(
+    walletClient, requirements, paymentHeader
+  );
+  
+  // Send to device via BLE
+  await sendPaymentToDevice(device, signedPayment, options, customText);
+};
+</code></pre>
+                </div>
+              </div>
+
+              <div class="tab-panel hidden" data-panel="react">
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-5">
+                  <div class="flex items-center justify-between mb-3">
+                    <p class="font-medium">React Web App with Web Bluetooth</p>
+                    <button
+                      class="copy-btn text-xs text-white/70 hover:text-white"
+                      data-copy-target="#code-react"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <pre
+                    class="overflow-auto rounded-xl bg-black/50 p-4 text-sm leading-6"
+                  ><code id="code-react">import { useState, useRef } from 'react';
+import { useWalletClient } from 'wagmi';
+import { preparePaymentHeader, signPaymentHeader } from '@coinbase/x402/client';
+
+// Web Bluetooth constants (Nordic UART service)
+const SERVICE_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+const TX_CHAR_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+const RX_CHAR_UUID = "6e400004-b5a3-f393-e0a9-e50e24dcca9e";
+
+function BluetoothPaymentApp() {
+  const { data: walletClient } = useWalletClient();
+  const [connected, setConnected] = useState(false);
+  const [paymentRequirements, setPaymentRequirements] = useState(null);
+  const gattRefs = useRef({});
+
+  // Web Bluetooth device scanning and connection
+  const handleScanClick = async () => {
+    try {
+      if (!navigator.bluetooth) {
+        alert("Web Bluetooth API is not available in this browser.");
+        return;
+      }
+      
+      const device = await navigator.bluetooth.requestDevice({
+        filters: [{ services: [SERVICE_UUID] }],
+        optionalServices: [SERVICE_UUID],
+      });
+
+      const server = await device.gatt.connect();
+      const service = await server.getPrimaryService(SERVICE_UUID);
+      const rx = await service.getCharacteristic(RX_CHAR_UUID);
+      const tx = await service.getCharacteristic(TX_CHAR_UUID);
+
+      // Listen for device notifications
+      await tx.startNotifications();
+      tx.addEventListener('characteristicvaluechanged', (event) => {
+        const decoder = new TextDecoder('utf-8');
+        const text = decoder.decode(event.target.value);
+        
+        if (text.startsWith('402://')) {
+          const { network, payTo, price } = JSON.parse(text.slice(6));
+          setPaymentRequirements({ network, payTo, maxAmountRequired: price });
+        }
+      });
+
+      gattRefs.current = { device, server, rx, tx };
+      setConnected(true);
+    } catch (error) {
+      console.error('Bluetooth connection error:', error);
     }
+  };
 
-    // ===== Payment Sheet (USDC · Base) =====
-    const paySheet = qs('#paySheet'); const sheetPanel = qs('#sheetPanel'); const sheetBackdrop = qs('#sheetBackdrop');
-    const sheetMerchant = qs('#sheetMerchant'); const sheetItemsList = qs('#sheetItemsList'); const sheetTotal = qs('#sheetTotal'); const sheetTotal2 = qs('#sheetTotal2'); const sheetFees = qs('#sheetFees');
-    const sheetConfirm = qs('#sheetConfirm'); const sheetError = qs('#sheetError'); const authWrap = qs('#authWrap'); const authText = qs('#authText');
+  // Send payment to device
+  const handlePayment = async (options, customText) => {
+    if (!paymentRequirements || !walletClient) return;
 
-    function openSheet(){
-      const {subtotal, fees, total} = totals();
-      sheetMerchant.textContent = device?.name || '—';
-      sheetItemsList.innerHTML = cart.map(i=>`<div class='flex items-center justify-between'><span>${i.name} × ${i.qty}</span><span>${fmtUSD(i.priceUSD*i.qty)}</span></div>`).join('');
-      sheetFees.textContent = fmtUSD(fees); sheetTotal.textContent=fmtUSD(total); sheetTotal2.textContent=fmtUSD(total);
-      updateConfirmState(total);
-      sheetError.classList.add('hidden');
-      paySheet.classList.remove('hidden'); requestAnimationFrame(()=> sheetPanel.classList.add('sheet-enter-active'));
+    try {
+      // Prepare x402 payment header
+      const paymentHeader = preparePaymentHeader(
+        walletClient.account.address, 1, paymentRequirements
+      );
+
+      // Sign payment with wallet
+      const signedMessage = await signPaymentHeader(
+        walletClient, paymentRequirements, paymentHeader
+      );
+
+      // Send to device via Web Bluetooth
+      const payload = JSON.parse(atob(signedMessage));
+      const encoder = new TextEncoder();
+      const data = encoder.encode(`X-PAYMENT:START${JSON.stringify(payload)}`);
+      await gattRefs.current.rx.writeValue(data);
+      
+    } catch (error) {
+      console.error('Payment error:', error);
     }
-    function closeSheet(){ paySheet.classList.add('hidden'); sheetPanel.classList.remove('sheet-enter-active'); authWrap.classList.add('hidden'); }
-    sheetBackdrop.onclick = closeSheet;
+  };
 
-    function updateConfirmState(total){
-      const need = total; // USDC 1:1
-      const have = wallet.usdc;
-      if(have < need){
-        sheetConfirm.disabled = true;
-        sheetError.textContent = `Insufficient USDC (need ${fmtUSD(need)})`;
-        sheetError.classList.remove('hidden');
-      } else {
-        sheetConfirm.disabled = false; sheetError.classList.add('hidden');
+  return (
+    &lt;div className="min-h-screen bg-black text-white"&gt;
+      {!connected ? (
+        &lt;button onClick={handleScanClick} className="bg-blue-600 px-6 py-3 rounded"&gt;
+          Scan for Devices
+        &lt;/button&gt;
+      ) : (
+        &lt;div&gt;Connected! Ready to pay.&lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- DIY Projects -->
+        <section id="diy" class="relative border-t border-white/10">
+          <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24">
+            <div class="max-w-4xl">
+              <h2 class="text-3xl sm:text-4xl font-semibold tracking-tight">
+                DIY Projects
+              </h2>
+              <p class="text-white/70 mt-3 text-lg">
+                Free tutorials to build crypto payment devices with ESP32.
+                Complete code examples included.
+              </p>
+
+              <!-- Project Cards -->
+              <div class="mt-8 space-y-8">
+                <!-- Coffee Machine -->
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold text-white">
+                      Smart Coffee Machine
+                    </h3>
+                    <span
+                      class="text-xs rounded-full px-3 py-1 bg-white/10 text-white/70"
+                      >FREE</span
+                    >
+                  </div>
+                  <p class="text-white/70 mb-4">
+                    Control relay pins to activate coffee machine when payment
+                    is received.
+                  </p>
+
+                  <div class="mb-4">
+                    <h4 class="font-medium text-white mb-2">
+                      Hardware needed:
+                    </h4>
+                    <p class="text-sm text-white/60">
+                      ESP32, 4-channel relay module, push buttons, LEDs
+                    </p>
+                  </div>
+
+                  <details class="mb-4">
+                    <summary class="cursor-pointer font-medium text-white mb-3">
+                      View ESP32 Code
+                    </summary>
+                    <pre
+                      class="overflow-auto rounded-xl bg-black/50 p-4 text-sm leading-6"
+                    ><code>#include &lt;WiFi.h&gt;
+#include "X402Aurdino.h"
+#include "x4pay-core.h"
+
+// WiFi credentials
+const char* ssid = "YourWiFi";
+const char* password = "YourPassword";
+
+// Payment configuration
+const String DEVICE_NAME = "Coffee Machine";
+const String NETWORK = "base-sepolia";
+const String PAY_TO = "0xYourAddress";
+const String LOGO = "https://example.com/coffee-logo.jpg";
+const String DESCRIPTION = "Fresh coffee payments";
+
+// Coffee options and pins
+const String coffeeOptions[] = {"Espresso", "Americano", "Latte", "Cappuccino"};
+const int relayPins[] = {2, 4, 5, 18}; // GPIO pins for relays
+const int statusLED = 19;
+
+X402Ble* coffeeMachine;
+
+// Dynamic pricing based on coffee type
+String calculatePrice(const std::vector&lt;String&gt;& options, const String& context) {
+  for (const auto& option : options) {
+    if (option == "Latte" || option == "Cappuccino") {
+      return "2000000"; // 2 USDC for specialty drinks
+    }
+  }
+  return "1000000"; // 1 USDC for regular coffee
+}
+
+// Payment success callback
+void onPaymentSuccess(const std::vector&lt;String&gt;& options, const String& context) {
+  Serial.println("Payment received! Making coffee...");
+  digitalWrite(statusLED, HIGH);
+  
+  // Activate appropriate relay based on selection
+  for (const auto& option : options) {
+    for (int i = 0; i &lt; 4; i++) {
+      if (option == coffeeOptions[i]) {
+        digitalWrite(relayPins[i], HIGH);
+        delay(5000); // Run for 5 seconds
+        digitalWrite(relayPins[i], LOW);
+        break;
       }
     }
+  }
+  
+  digitalWrite(statusLED, LOW);
+  Serial.println("Coffee ready!");
+}
 
-    sheetConfirm.onclick = ()=>{
-      const { total } = totals();
-      if(wallet.usdc < total){ updateConfirmState(total); return; }
-      sheetConfirm.disabled = true; authWrap.classList.remove('hidden'); authText.textContent = 'Authenticating…';
-      setTimeout(()=> authText.textContent='Beaming over Bluetooth…', 900);
-      setTimeout(()=> {
-        wallet.usdc = Math.max(0, wallet.usdc - total);
-        renderWallet();
-        authText.textContent = 'Paid';
-        cart=[]; renderServices(); updateCheckoutBar();
-        setTimeout(()=> closeSheet(), 700);
-        sheetConfirm.disabled=false;
-      }, 1800);
+void setup() {
+  Serial.begin(115200);
+  
+  // Initialize pins
+  for (int i = 0; i &lt; 4; i++) {
+    pinMode(relayPins[i], OUTPUT);
+    digitalWrite(relayPins[i], LOW);
+  }
+  pinMode(statusLED, OUTPUT);
+  
+  // Connect to WiFi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("WiFi connected!");
+  
+  // Create payment device
+  coffeeMachine = new X402Ble(DEVICE_NAME, "1000000", PAY_TO, NETWORK, 
+                              LOGO, DESCRIPTION, "");
+  
+  // Configure options and callbacks
+  coffeeMachine-&gt;enableOptions(coffeeOptions, 4);
+  coffeeMachine-&gt;setDynamicPriceCallback(calculatePrice);
+  coffeeMachine-&gt;setOnPay(onPaymentSuccess);
+  
+  // Start BLE service
+  coffeeMachine-&gt;begin();
+  Serial.println("Coffee machine ready for payments!");
+}
+
+void loop() {
+  // Check for completed payments
+  if (coffeeMachine-&gt;getStatusAndReset()) {
+    Serial.println("New payment processed");
+  }
+  delay(100);
+}
+</code></pre>
+                  </details>
+                </div>
+
+                <!-- Bike Rental -->
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold text-white">
+                      Bike Rental Lock
+                    </h3>
+                    <span
+                      class="text-xs rounded-full px-3 py-1 bg-white/10 text-white/70"
+                      >FREE</span
+                    >
+                  </div>
+                  <p class="text-white/70 mb-4">
+                    Control servo motor lock when payment is received.
+                  </p>
+
+                  <div class="mb-4">
+                    <h4 class="font-medium text-white mb-2">
+                      Hardware needed:
+                    </h4>
+                    <p class="text-sm text-white/60">
+                      ESP32, servo motor, GPS module, status LEDs
+                    </p>
+                  </div>
+
+                  <details class="mb-4">
+                    <summary class="cursor-pointer font-medium text-white mb-3">
+                      View ESP32 Code
+                    </summary>
+                    <pre
+                      class="overflow-auto rounded-xl bg-black/50 p-4 text-sm leading-6"
+                    ><code>#include &lt;WiFi.h&gt;
+#include &lt;ESP32Servo.h&gt;
+#include "X402Aurdino.h"
+#include "x4pay-core.h"
+
+// WiFi and payment setup
+const char* ssid = "YourWiFi";
+const char* password = "YourPassword";
+const String DEVICE_NAME = "Bike Rental";
+const String NETWORK = "base-sepolia";
+const String PAY_TO = "0xYourAddress";
+
+// Hardware pins
+const int servoPin = 9;
+const int lockLED = 2;
+const int unlockLED = 4;
+
+Servo lockServo;
+X402Ble* bikeRental;
+bool isUnlocked = false;
+unsigned long unlockTime = 0;
+
+// Rental periods (in minutes)
+const String rentalOptions[] = {"15 min", "30 min", "60 min", "24 hours"};
+
+String calculateRentalPrice(const std::vector&lt;String&gt;& options, const String& context) {
+  for (const auto& option : options) {
+    if (option == "15 min") return "1500000";  // $1.50
+    if (option == "30 min") return "2500000";  // $2.50
+    if (option == "60 min") return "4000000";  // $4.00
+    if (option == "24 hours") return "15000000"; // $15.00
+  }
+  return "1500000"; // Default 15 min
+}
+
+void onRentalPayment(const std::vector&lt;String&gt;& options, const String& context) {
+  Serial.println("Payment received! Unlocking bike...");
+  
+  // Unlock the bike
+  lockServo.write(90); // Unlock position
+  isUnlocked = true;
+  unlockTime = millis();
+  
+  // Set unlock duration based on payment
+  unsigned long duration = 15 * 60 * 1000; // Default 15 minutes
+  for (const auto& option : options) {
+    if (option == "30 min") duration = 30 * 60 * 1000;
+    else if (option == "60 min") duration = 60 * 60 * 1000;
+    else if (option == "24 hours") duration = 24 * 60 * 60 * 1000;
+  }
+  
+  digitalWrite(unlockLED, HIGH);
+  digitalWrite(lockLED, LOW);
+  
+  Serial.print("Bike unlocked for: ");
+  Serial.println(options[0]);
+}
+
+void setup() {
+  Serial.begin(115200);
+  
+  // Initialize hardware
+  lockServo.attach(servoPin);
+  lockServo.write(0); // Lock position
+  pinMode(lockLED, OUTPUT);
+  pinMode(unlockLED, OUTPUT);
+  digitalWrite(lockLED, HIGH);
+  digitalWrite(unlockLED, LOW);
+  
+  // Connect to WiFi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  
+  // Setup payment device
+  bikeRental = new X402Ble(DEVICE_NAME, "1500000", PAY_TO, NETWORK, 
+                           "", "Bike rental by the hour", "");
+  
+  bikeRental-&gt;enableOptions(rentalOptions, 4);
+  bikeRental-&gt;setDynamicPriceCallback(calculateRentalPrice);
+  bikeRental-&gt;setOnPay(onRentalPayment);
+  bikeRental-&gt;begin();
+  
+  Serial.println("Bike rental system ready!");
+}
+
+void loop() {
+  // Check if rental time expired
+  if (isUnlocked && (millis() - unlockTime > 15 * 60 * 1000)) {
+    // Lock the bike again
+    lockServo.write(0);
+    isUnlocked = false;
+    digitalWrite(lockLED, HIGH);
+    digitalWrite(unlockLED, LOW);
+    Serial.println("Rental expired. Bike locked.");
+  }
+  
+  delay(1000);
+}
+</code></pre>
+                  </details>
+                </div>
+
+                <!-- Vending Machine -->
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold text-white">
+                      Snack Vending Machine
+                    </h3>
+                    <span
+                      class="text-xs rounded-full px-3 py-1 bg-white/10 text-white/70"
+                      >FREE</span
+                    >
+                  </div>
+                  <p class="text-white/70 mb-4">
+                    Control servo motors to dispense products when payment is
+                    received.
+                  </p>
+
+                  <div class="mb-4">
+                    <h4 class="font-medium text-white mb-2">
+                      Hardware needed:
+                    </h4>
+                    <p class="text-sm text-white/60">
+                      ESP32, servo motors, IR sensors, LCD display
+                    </p>
+                  </div>
+
+                  <details class="mb-4">
+                    <summary class="cursor-pointer font-medium text-white mb-3">
+                      View ESP32 Code
+                    </summary>
+                    <pre
+                      class="overflow-auto rounded-xl bg-black/50 p-4 text-sm leading-6"
+                    ><code>#include &lt;WiFi.h&gt;
+#include &lt;ESP32Servo.h&gt;
+#include &lt;LiquidCrystal_I2C.h&gt;
+#include "X402Aurdino.h"
+#include "x4pay-core.h"
+
+// WiFi credentials
+const char* ssid = "YourWiFi";
+const char* password = "YourPassword";
+
+// Payment configuration
+const String DEVICE_NAME = "Snack Machine";
+const String NETWORK = "base-sepolia";
+const String PAY_TO = "0xYourAddress";
+
+// Hardware setup
+Servo dispenserServos[4];
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+const int servoPins[] = {9, 10, 11, 12};
+const int sensorPins[] = {2, 4, 5, 18};
+
+// Product configuration
+const String products[] = {"Chips", "Cookies", "Candy", "Nuts"};
+const String prices[] = {"1000000", "1500000", "2000000", "2500000"}; // $1-2.50
+int inventory[] = {10, 8, 12, 5}; // Stock levels
+
+X402Ble* vendingMachine;
+
+String getProductPrice(const std::vector&lt;String&gt;& options, const String& context) {
+  for (const auto& option : options) {
+    for (int i = 0; i &lt; 4; i++) {
+      if (option == products[i]) {
+        return prices[i];
+      }
     }
+  }
+  return "1000000"; // Default price
+}
 
-    // ===== Modals: deposit / withdraw / recover / backup =====
-    const modalBackdrop = qs('#modalBackdrop');
-    const depositSheet = qs('#depositSheet'); const withdrawSheet = qs('#withdrawSheet'); const recoverSheet = qs('#recoverSheet'); const backupSheet = qs('#backupSheet');
-    const btnDeposit = qs('#btnDeposit'); const btnWithdraw = qs('#btnWithdraw'); const btnRecover = qs('#btnRecover'); const btnBackup = qs('#btnBackup');
+void dispenseProduct(const std::vector&lt;String&gt;& options, const String& context) {
+  Serial.println("Payment confirmed! Dispensing product...");
+  
+  for (const auto& option : options) {
+    for (int i = 0; i &lt; 4; i++) {
+      if (option == products[i] && inventory[i] > 0) {
+        // Dispense product
+        dispenserServos[i].write(90);
+        delay(1000);
+        dispenserServos[i].write(0);
+        
+        // Update inventory
+        inventory[i]--;
+        
+        // Update display
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Dispensing:");
+        lcd.setCursor(0, 1);
+        lcd.print(option);
+        
+        Serial.print("Dispensed: ");
+        Serial.println(option);
+        
+        delay(3000);
+        updateDisplay();
+        return;
+      }
+    }
+  }
+}
 
-    btnDeposit.onclick = ()=> openModal(depositSheet);
-    btnWithdraw.onclick = ()=> openModal(withdrawSheet);
-    btnRecover.onclick = ()=> openModal(recoverSheet);
-    btnBackup.onclick = ()=> openModal(backupSheet);
+void updateDisplay() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Crypto Vending");
+  lcd.setCursor(0, 1);
+  lcd.print("Tap to pay");
+}
 
-    function openModal(sheet){ modalBackdrop.classList.remove('hidden'); sheet.classList.remove('hidden'); }
-    function closeModal(){ modalBackdrop.classList.add('hidden'); [depositSheet,withdrawSheet,recoverSheet,backupSheet].forEach(s=> s.classList.add('hidden')); }
-    window.closeModal = closeModal;
-    modalBackdrop.onclick = closeModal;
+void setup() {
+  Serial.begin(115200);
+  
+  // Initialize LCD
+  lcd.init();
+  lcd.backlight();
+  updateDisplay();
+  
+  // Initialize servos and sensors
+  for (int i = 0; i &lt; 4; i++) {
+    dispenserServos[i].attach(servoPins[i]);
+    dispenserServos[i].write(0);
+    pinMode(sensorPins[i], INPUT);
+  }
+  
+  // Connect to WiFi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  
+  // Setup vending machine
+  vendingMachine = new X402Ble(DEVICE_NAME, "1000000", PAY_TO, NETWORK,
+                               "", "Crypto snack vending", "");
+  
+  // Configure available products
+  vendingMachine-&gt;enableOptions(products, 4);
+  vendingMachine-&gt;setDynamicPriceCallback(getProductPrice);
+  vendingMachine-&gt;setOnPay(dispenseProduct);
+  vendingMachine-&gt;begin();
+  
+  Serial.println("Vending machine ready!");
+}
 
-    // Deposit actions
-    const copyAddr = qs('#copyAddr'); const simulateDeposit = qs('#simulateDeposit');
-    copyAddr.onclick = ()=> { navigator.clipboard.writeText(wallet.address).catch(()=>{}); };
-    simulateDeposit.onclick = ()=> { wallet.usdc += 10; renderWallet(); updateCheckoutBar(); };
+void loop() {
+  // Monitor inventory and update availability
+  static unsigned long lastCheck = 0;
+  if (millis() - lastCheck > 5000) { // Check every 5 seconds
+    lastCheck = millis();
+    
+    // Update product options based on inventory
+    std::vector&lt;String&gt; availableProducts;
+    for (int i = 0; i &lt; 4; i++) {
+      if (inventory[i] > 0) {
+        availableProducts.push_back(products[i]);
+      }
+    }
+    
+    // Log inventory status
+    Serial.print("Inventory: ");
+    for (int i = 0; i &lt; 4; i++) {
+      Serial.print(products[i]);
+      Serial.print(":");
+      Serial.print(inventory[i]);
+      Serial.print(" ");
+    }
+    Serial.println();
+  }
+  
+  delay(100);
+}
+</code></pre>
+                  </details>
+                </div>
 
-    // Withdraw actions
-    const wdTo = qs('#wdTo'); const wdAmt = qs('#wdAmt'); const wdErr = qs('#wdErr'); const wdSend = qs('#wdSend');
-    wdSend.onclick = ()=>{
-      const to = (wdTo.value||'').trim(); const amt = parseFloat(wdAmt.value||'0');
-      if(!to || !to.startsWith('0x') || to.length<10){ wdErr.textContent='Enter a valid address'; wdErr.classList.remove('hidden'); return; }
-      if(!(amt>0)){ wdErr.textContent='Enter a valid amount'; wdErr.classList.remove('hidden'); return; }
-      if(amt>wallet.usdc){ wdErr.textContent='Insufficient balance'; wdErr.classList.remove('hidden'); return; }
-      wdErr.classList.add('hidden'); wallet.usdc -= amt; renderWallet(); closeModal();
-    };
+                <!-- Parking Meter -->
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold text-white">
+                      Smart Parking Meter
+                    </h3>
+                    <span
+                      class="text-xs rounded-full px-3 py-1 bg-white/10 text-white/70"
+                      >FREE</span
+                    >
+                  </div>
+                  <p class="text-white/70 mb-4">
+                    Use ultrasonic sensor to detect cars and set parking time
+                    when payment is received.
+                  </p>
 
-    // Recover actions
-    const rcPhrase = qs('#rcPhrase'); const rcRestore = qs('#rcRestore');
-    rcRestore.onclick = ()=>{ const data = rcPhrase.value.trim(); if(!data){ return; } wallet.address = '0x' + Math.random().toString(16).slice(2).padEnd(40,'0').slice(0,40); wallet.usdc = 0; renderWallet(); closeModal(); };
+                  <div class="mb-4">
+                    <h4 class="font-medium text-white mb-2">
+                      Hardware needed:
+                    </h4>
+                    <p class="text-sm text-white/60">
+                      ESP32, ultrasonic sensor, 7-segment display, buzzer
+                    </p>
+                  </div>
 
-    // Backup actions
-    const bkDownload = qs('#bkDownload');
-    bkDownload.onclick = ()=>{
-      const payload = { chain: wallet.chain, address: wallet.address, createdAt: new Date().toISOString(), hint: 'mock-encrypted' };
-      const blob = new Blob([JSON.stringify(payload,null,2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = 'x4pay-backup.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    };
+                  <details class="mb-4">
+                    <summary class="cursor-pointer font-medium text-white mb-3">
+                      View ESP32 Code
+                    </summary>
+                    <pre
+                      class="overflow-auto rounded-xl bg-black/50 p-4 text-sm leading-6"
+                    ><code>#include &lt;WiFi.h&gt;
+#include "X402Aurdino.h"
+#include "x4pay-core.h"
 
-    // ===== Utils / Icons =====
-    function qs(s){ return document.querySelector(s) }
-    function bluetoothIcon(){ return '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7l10 10-5 5V2l5 5L7 17"/></svg>' }
-    function signalBars(n){ return `<div class='flex gap-0.5 items-end' aria-label='Signal ${n}/4'>${[1,2,3,4].map(i=>`<div class='w-1 rounded ${i<=n?'bg-white':'bg-white/30'}' style='height:${i*4}px'></div>`).join('')}</div>` }
-    function rssiBars(v){ if(v>-60) return 4; if(v>-67) return 3; if(v>-75) return 2; return 1 }
-    function bikeIcon(){ return '<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M12 17.5h2l-3-7h4l2 4"/></svg>' }
-    function coffeeIcon(){ return '<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h14v5a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8Z"/><path d="M17 8h1a3 3 0 1 1 0 6h-1"/></svg>' }
-    function snackIcon(){ return '<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h10l-1 4H8L7 3Z"/><path d="M8 7v13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7"/></svg>' }
-    function zapIcon(){ return '<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 3L4 14h7l-1 7 9-11h-7l1-7z"/></svg>' }
+// WiFi and payment setup
+const char* ssid = "YourWiFi";
+const char* password = "YourPassword";
+const String DEVICE_NAME = "Parking Meter";
+const String NETWORK = "base-sepolia";
+const String PAY_TO = "0xYourAddress";
 
-    // ===== Init =====
-    setTab('home');
-  </script>
-</body>
+// Hardware pins
+const int trigPin = 5;
+const int echoPin = 18;
+const int buzzerPin = 19;
+const int displayPins[] = {2, 4, 16, 17}; // For 7-segment display
+
+// Parking configuration
+const String timeOptions[] = {"30 min", "1 hour", "2 hours", "4 hours"};
+unsigned long parkingEndTime = 0;
+bool carDetected = false;
+
+X402Ble* parkingMeter;
+
+String calculateParkingFee(const std::vector&lt;String&gt;& options, const String& context) {
+  for (const auto& option : options) {
+    if (option == "30 min") return "500000";   // $0.50
+    if (option == "1 hour") return "1000000";  // $1.00
+    if (option == "2 hours") return "1800000"; // $1.80
+    if (option == "4 hours") return "3000000"; // $3.00
+  }
+  return "1000000"; // Default 1 hour
+}
+
+void onParkingPayment(const std::vector&lt;String&gt;& options, const String& context) {
+  Serial.println("Parking payment received!");
+  
+  // Calculate parking duration
+  unsigned long duration = 60 * 60 * 1000; // Default 1 hour in milliseconds
+  for (const auto& option : options) {
+    if (option == "30 min") duration = 30 * 60 * 1000;
+    else if (option == "2 hours") duration = 2 * 60 * 60 * 1000;
+    else if (option == "4 hours") duration = 4 * 60 * 60 * 1000;
+  }
+  
+  parkingEndTime = millis() + duration;
+  
+  // Confirmation beep
+  digitalWrite(buzzerPin, HIGH);
+  delay(200);
+  digitalWrite(buzzerPin, LOW);
+  
+  Serial.print("Parking paid for: ");
+  Serial.println(options[0]);
+}
+
+float measureDistance() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  long duration = pulseIn(echoPin, HIGH);
+  float distance = duration * 0.034 / 2; // Convert to cm
+  
+  return distance;
+}
+
+void displayTime(int minutes) {
+  // Simple 7-segment display function
+  // You would implement actual display logic here
+  Serial.print("Time remaining: ");
+  Serial.print(minutes);
+  Serial.println(" minutes");
+}
+
+void setup() {
+  Serial.begin(115200);
+  
+  // Initialize pins
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
+  
+  // Initialize display pins
+  for (int i = 0; i &lt; 4; i++) {
+    pinMode(displayPins[i], OUTPUT);
+  }
+  
+  // Connect to WiFi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  
+  // Setup parking meter
+  parkingMeter = new X402Ble(DEVICE_NAME, "1000000", PAY_TO, NETWORK,
+                             "", "Digital parking payments", "");
+  
+  parkingMeter-&gt;enableOptions(timeOptions, 4);
+  parkingMeter-&gt;setDynamicPriceCallback(calculateParkingFee);
+  parkingMeter-&gt;setOnPay(onParkingPayment);
+  parkingMeter-&gt;begin();
+  
+  Serial.println("Parking meter ready!");
+}
+
+void loop() {
+  // Check for car presence
+  float distance = measureDistance();
+  carDetected = (distance < 200); // Car detected if within 2 meters
+  
+  // Check parking time
+  if (parkingEndTime > 0) {
+    if (millis() > parkingEndTime) {
+      // Parking expired
+      if (carDetected) {
+        // Sound alarm for overtime parking
+        digitalWrite(buzzerPin, HIGH);
+        delay(100);
+        digitalWrite(buzzerPin, LOW);
+        delay(900);
+      } else {
+        // Car left, reset timer
+        parkingEndTime = 0;
+        Serial.println("Car left. Meter reset.");
+      }
+    } else {
+      // Display remaining time
+      unsigned long remaining = parkingEndTime - millis();
+      int minutesLeft = remaining / (60 * 1000);
+      displayTime(minutesLeft);
+    }
+  }
+  
+  delay(1000);
+}
+</code></pre>
+                  </details>
+                </div>
+              </div>
+
+              <!-- Getting Started -->
+              <div
+                class="mt-12 rounded-2xl border border-white/15 bg-white/5 p-6"
+              >
+                <h3 class="text-xl font-semibold text-white mb-4">
+                  Getting Started
+                </h3>
+                <div class="space-y-4 text-sm text-white/70">
+                  <div class="flex items-start gap-3">
+                    <span class="text-white font-mono text-xs mt-1">1.</span>
+                    <span
+                      ><strong>Install Arduino IDE</strong> and add ESP32 board
+                      support</span
+                    >
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <span class="text-white font-mono text-xs mt-1">2.</span>
+                    <span
+                      ><strong>Install X402 libraries</strong> from the Arduino
+                      library manager</span
+                    >
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <span class="text-white font-mono text-xs mt-1">3.</span>
+                    <span
+                      ><strong>Copy the code</strong> for your chosen
+                      project</span
+                    >
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <span class="text-white font-mono text-xs mt-1">4.</span>
+                    <span
+                      ><strong>Update WiFi credentials</strong> and payment
+                      address</span
+                    >
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <span class="text-white font-mono text-xs mt-1">5.</span>
+                    <span
+                      ><strong>Upload to ESP32</strong> and start accepting
+                      payments</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Convert your ESP32 -->
+        <section id="convert" class="relative border-t border-white/10">
+          <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24">
+            <div class="max-w-4xl">
+              <h2 class="text-3xl sm:text-4xl font-semibold tracking-tight">
+                Install Arduino libraries on ESP32
+              </h2>
+              <p class="text-white/70 mt-3 text-lg">
+                Install X402 Arduino libraries on any Microcontroller (ESP32
+                tested), configure payment address, upload code to ESP32.
+              </p>
+              <div class="mt-8 grid gap-4 sm:grid-cols-3">
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-5">
+                  <p class="text-sm text-white/60">Step 1</p>
+                  <h3 class="font-medium mt-1">Install libraries</h3>
+                  <p class="text-sm text-white/70 mt-1">
+                    Install X402-Aurdino and X402-BLE-Aurdino in Arduino IDE.
+                  </p>
+                </div>
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-5">
+                  <p class="text-sm text-white/60">Step 2</p>
+                  <h3 class="font-medium mt-1">Configure and upload</h3>
+                  <p class="text-sm text-white/70 mt-1">
+                    Set payment address and WiFi credentials, upload to ESP32.
+                  </p>
+                </div>
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-5">
+                  <p class="text-sm text-white/60">Step 3</p>
+                  <h3 class="font-medium mt-1">Accept payments</h3>
+                  <p class="text-sm text-white/70 mt-1">
+                    Device advertises over Bluetooth (BLE) and verifies
+                    payments.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Technical Specifications -->
+        <section id="technical" class="relative border-t border-white/10">
+          <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24">
+            <div class="max-w-4xl">
+              <h2 class="text-3xl sm:text-4xl font-semibold tracking-tight">
+                Technical Specifications
+              </h2>
+              <p class="text-white/70 mt-3 text-lg">
+                Complete technical details about the x4pay-core payment system
+                implementation.
+              </p>
+
+              <!-- Bluetooth Protocol Details -->
+              <div class="mt-8 space-y-6">
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <h3 class="text-xl font-semibold text-white mb-4">
+                    Bluetooth (BLE) Protocol
+                  </h3>
+                  <div class="grid gap-4 lg:grid-cols-2">
+                    <div>
+                      <h4 class="font-medium text-white mb-2">
+                        Service & Characteristics
+                      </h4>
+                      <div class="space-y-2 text-sm text-white/70 font-mono">
+                        <div>
+                          <span class="text-cyan-400">Service UUID:</span>
+                          6e400002-b5a3-f393-e0a9-e50e24dcca9e
+                        </div>
+                        <div>
+                          <span class="text-cyan-400">TX Characteristic:</span>
+                          6e400003-b5a3-f393-e0a9-e50e24dcca9e
+                        </div>
+                        <div>
+                          <span class="text-cyan-400">RX Characteristic:</span>
+                          6e400004-b5a3-f393-e0a9-e50e24dcca9e
+                        </div>
+                        <div>
+                          <span class="text-cyan-400">Protocol:</span> Nordic
+                          UART Service (NUS)
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 class="font-medium text-white mb-2">
+                        Connection Parameters
+                      </h4>
+                      <div class="space-y-2 text-sm text-white/70">
+                        <div>
+                          <span class="text-emerald-400">MTU Size:</span> 150
+                          bytes (set in code)
+                        </div>
+                        <div>
+                          <span class="text-emerald-400"
+                            >Connection Interval:</span
+                          >
+                          7.5ms - 4000ms
+                        </div>
+                        <div>
+                          <span class="text-emerald-400"
+                            >Advertising Interval:</span
+                          >
+                          100ms
+                        </div>
+                        <div>
+                          <span class="text-emerald-400">Range:</span> ~10
+                          meters (Class 2)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Data Transfer Protocol -->
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <h3 class="text-xl font-semibold text-white mb-4">
+                    Data Transfer Protocol
+                  </h3>
+
+                  <h4 class="font-medium text-white mb-3">
+                    1. Device Advertisement
+                  </h4>
+                  <p class="text-sm text-white/70 mb-3">
+                    ESP32 advertises with device name containing payment info:
+                  </p>
+                  <pre
+                    class="rounded-lg bg-black/50 p-3 text-xs text-white/80 mb-4 overflow-x-auto"
+                  ><code>Device Name Format: "x402-[DEVICE_NAME]"
+Advertisement Data: Service UUID + Device Name
+Scan Response: Additional device info if needed</code></pre>
+
+                  <h4 class="font-medium text-white mb-3">
+                    2. Connection Handshake
+                  </h4>
+                  <div class="space-y-3 text-sm text-white/70">
+                    <div class="flex items-start gap-3">
+                      <span class="text-cyan-400 font-mono">APP:</span>
+                      <span
+                        >Scans for devices with Nordic UART service UUID</span
+                      >
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-cyan-400 font-mono">APP:</span>
+                      <span>Connects to device via GATT</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-cyan-400 font-mono">APP:</span>
+                      <span>Discovers services and characteristics</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-cyan-400 font-mono">APP:</span>
+                      <span
+                        >Subscribes to TX characteristic for notifications</span
+                      >
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-emerald-400 font-mono">ESP32:</span>
+                      <span
+                        >Sends payment requirements JSON via TX
+                        characteristic</span
+                      >
+                    </div>
+                  </div>
+
+                  <h4 class="font-medium text-white mb-3 mt-6">
+                    3. Payment Requirements JSON
+                  </h4>
+                  <pre
+                    class="rounded-lg bg-black/50 p-3 text-xs text-white/80 mb-4 overflow-x-auto"
+                  ><code>{
+  "network": "base-sepolia",
+  "payTo": "0xa78eD39F695615315458Bb066ac9a5F28Dfd65FE",
+  "maxAmountRequired": "1000000",
+  "logoURL": "https://example.com/logo.jpg",
+  "description": "Coffee machine payment",
+  "options": ["Espresso", "Americano", "Latte"],
+  "dynamicPricing": true,
+  "recurring": {
+    "enabled": true,
+    "intervalSeconds": 30
+  }
+}</code></pre>
+
+                  <h4 class="font-medium text-white mb-3">
+                    4. Payment Response
+                  </h4>
+                  <div class="space-y-3 text-sm text-white/70">
+                    <div class="flex items-start gap-3">
+                      <span class="text-cyan-400 font-mono">APP:</span>
+                      <span
+                        >User selects options and confirms payment in
+                        wallet</span
+                      >
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-cyan-400 font-mono">APP:</span>
+                      <span
+                        >Signs transaction with private key
+                        (PIN-protected)</span
+                      >
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-cyan-400 font-mono">APP:</span>
+                      <span
+                        >Sends payment payload JSON via RX characteristic</span
+                      >
+                    </div>
+                  </div>
+
+                  <h4 class="font-medium text-white mb-3 mt-6">
+                    5. Payment Payload JSON
+                  </h4>
+                  <pre
+                    class="rounded-lg bg-black/50 p-3 text-xs text-white/80 mb-4 overflow-x-auto"
+                  ><code>{
+  "network": "base-sepolia",
+  "from": "0x742d35Cc6C3C0532925a3b8D345A2E5E0E2F",
+  "to": "0xa78eD39F695615315458Bb066ac9a5F28Dfd65FE",
+  "amount": "1500000",
+  "signature": "0x1c2b4d...",
+  "nonce": 42,
+  "selectedOptions": ["Latte"],
+  "timestamp": 1729814400
+}</code></pre>
+                </div>
+
+                <!-- Memory Management -->
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <h3 class="text-xl font-semibold text-white mb-4">
+                    ESP32 Memory Management
+                  </h3>
+                  <div class="grid gap-4 lg:grid-cols-2">
+                    <div>
+                      <h4 class="font-medium text-white mb-2">Memory Usage</h4>
+                      <div class="space-y-2 text-sm text-white/70">
+                        <div>
+                          <span class="text-violet-400">X402-Aurdino:</span>
+                          ~15KB program memory
+                        </div>
+                        <div>
+                          <span class="text-violet-400">X402-BLE-Aurdino:</span>
+                          ~45KB program memory
+                        </div>
+                        <div>
+                          <span class="text-violet-400">RAM Usage:</span> ~8KB
+                          during operation
+                        </div>
+                        <div>
+                          <span class="text-violet-400">JSON Buffer:</span> 2KB
+                          allocated
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 class="font-medium text-white mb-2">
+                        Optimization Features
+                      </h4>
+                      <div class="space-y-2 text-sm text-white/70">
+                        <div>
+                          <span class="text-orange-400">•</span> Stack
+                          monitoring with overflow detection
+                        </div>
+                        <div>
+                          <span class="text-orange-400">•</span> Dynamic memory
+                          allocation for JSON
+                        </div>
+                        <div>
+                          <span class="text-orange-400">•</span> Automatic
+                          garbage collection
+                        </div>
+                        <div>
+                          <span class="text-orange-400">•</span> RTOS task
+                          management
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Multi-threading Architecture -->
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <h3 class="text-xl font-semibold text-white mb-4">
+                    Multi-threading Architecture
+                  </h3>
+                  <p class="text-sm text-white/70 mb-4">
+                    X402-BLE-Aurdino uses FreeRTOS tasks for concurrent
+                    operation:
+                  </p>
+
+                  <div class="grid gap-4 lg:grid-cols-2">
+                    <div>
+                      <h4 class="font-medium text-white mb-2">
+                        Task Structure
+                      </h4>
+                      <div class="space-y-2 text-sm text-white/70">
+                        <div>
+                          <span class="text-cyan-400">BLE Task:</span> Handles
+                          Bluetooth connections (Priority 2)
+                        </div>
+                        <div>
+                          <span class="text-emerald-400">Payment Task:</span>
+                          Processes payment verification (Priority 3)
+                        </div>
+                        <div>
+                          <span class="text-violet-400">Main Task:</span> User
+                          code execution (Priority 1)
+                        </div>
+                        <div>
+                          <span class="text-orange-400">Watchdog Task:</span>
+                          System monitoring (Priority 4)
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 class="font-medium text-white mb-2">
+                        Synchronization
+                      </h4>
+                      <div class="space-y-2 text-sm text-white/70">
+                        <div>
+                          <span class="text-yellow-400">•</span> Mutex locks for
+                          shared resources
+                        </div>
+                        <div>
+                          <span class="text-yellow-400">•</span> Queue-based
+                          message passing
+                        </div>
+                        <div>
+                          <span class="text-yellow-400">•</span> Semaphore
+                          signaling for events
+                        </div>
+                        <div>
+                          <span class="text-yellow-400">•</span> Atomic
+                          operations for counters
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <h4 class="font-medium text-white mb-3 mt-4">
+                    Code Example: Task Creation
+                  </h4>
+                  <pre
+                    class="rounded-lg bg-black/50 p-3 text-xs text-white/80 overflow-x-auto"
+                  ><code>void X402Ble::begin() {
+  // Set active instance for worker callbacks
+  s_active = this;
+  NimBLEDevice::init(device_name_.c_str());
+  NimBLEDevice::setDeviceName(device_name_.c_str());
+  NimBLEDevice::setPower(ESP_PWR_LVL_P7);
+  NimBLEDevice::setSecurityAuth(false, false, false);
+  NimBLEDevice::setMTU(150);
+
+  // Start payment verification worker with large stack on core 1
+  PaymentVerifyWorker::begin(/*stackBytes=*/8192, /*prio=*/3, /*core=*/1);
+
+  pServer = NimBLEDevice::createServer();
+  pServer->setCallbacks(new ServerCallbacks());
+
+  pService = pServer->createService(SERVICE_UUID);
+}</code></pre>
+                </div>
+
+                <!-- App Connection Process -->
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <h3 class="text-xl font-semibold text-white mb-4">
+                    Mobile App Connection Process
+                  </h3>
+
+                  <h4 class="font-medium text-white mb-3">
+                    React Native Implementation
+                  </h4>
+                  <div class="space-y-3 text-sm text-white/70">
+                    <div>
+                      <span class="text-cyan-400">1. BLE Manager:</span> Uses
+                      react-native-ble-plx library
+                    </div>
+                    <div>
+                      <span class="text-cyan-400">2. Device Scanning:</span>
+                      Filters by Nordic UART service UUID
+                    </div>
+                    <div>
+                      <span class="text-cyan-400">3. Auto-connect:</span>
+                      Connects to strongest signal device
+                    </div>
+                    <div>
+                      <span class="text-cyan-400">4. Service Discovery:</span>
+                      Discovers payment service characteristics
+                    </div>
+                    <div>
+                      <span class="text-cyan-400">5. Data Exchange:</span>
+                      Subscribes to notifications, sends payments
+                    </div>
+                  </div>
+
+                  <h4 class="font-medium text-white mb-3 mt-4">
+                    Key Code: Device Connection
+                  </h4>
+                  <pre
+                    class="rounded-lg bg-black/50 p-3 text-xs text-white/80 overflow-x-auto"
+                  ><code>// Scan for devices
+const scanForDevices = () => {
+  bleManager.startDeviceScan(
+    [NORDIC_UART_SERVICE_UUID],
+    { allowDuplicates: false },
+    (error, device) => {
+      if (device?.name?.startsWith('x402-')) {
+        bleManager.stopDeviceScan();
+        connectToDevice(device);
+      }
+    }
+  );
+};
+
+// Connect and setup
+const connectToDevice = async (device) => {
+  const connected = await device.connect();
+  await connected.discoverAllServicesAndCharacteristics();
+  
+  // Subscribe to TX characteristic for incoming data
+  connected.monitorCharacteristicForService(
+    NORDIC_UART_SERVICE_UUID,
+    TX_CHARACTERISTIC_UUID,
+    (error, characteristic) => {
+      const data = JSON.parse(base64Decode(characteristic.value));
+      handlePaymentRequirements(data);
+    }
+  );
+};</code></pre>
+
+                  <h4 class="font-medium text-white mb-3 mt-4">
+                    Web App Implementation
+                  </h4>
+                  <div class="space-y-3 text-sm text-white/70">
+                    <div>
+                      <span class="text-emerald-400"
+                        >1. Web Bluetooth API:</span
+                      >
+                      navigator.bluetooth in Chrome/Edge
+                    </div>
+                    <div>
+                      <span class="text-emerald-400">2. Service Filter:</span>
+                      Requests access to Nordic UART service
+                    </div>
+                    <div>
+                      <span class="text-emerald-400">3. GATT Connection:</span>
+                      Connects via Bluetooth GATT protocol
+                    </div>
+                    <div>
+                      <span class="text-emerald-400"
+                        >4. Characteristic Access:</span
+                      >
+                      Reads/writes to TX/RX characteristics
+                    </div>
+                  </div>
+
+                  <h4 class="font-medium text-white mb-3 mt-4">
+                    Key Code: Web Bluetooth
+                  </h4>
+                  <pre
+                    class="rounded-lg bg-black/50 p-3 text-xs text-white/80 overflow-x-auto"
+                  ><code>const connectToDevice = async () => {
+  const device = await navigator.bluetooth.requestDevice({
+    filters: [{ services: ['6e400002-b5a3-f393-e0a9-e50e24dcca9e'] }]
+  });
+  
+  const server = await device.gatt.connect();
+  const service = await server.getPrimaryService('6e400002-b5a3-f393-e0a9-e50e24dcca9e');
+  
+  // Get characteristics
+  const txCharacteristic = await service.getCharacteristic('6e400003-b5a3-f393-e0a9-e50e24dcca9e');
+  const rxCharacteristic = await service.getCharacteristic('6e400004-b5a3-f393-e0a9-e50e24dcca9e');
+  
+  // Listen for data from device
+  await txCharacteristic.startNotifications();
+  txCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
+    const data = new TextDecoder().decode(event.target.value);
+    handlePaymentRequirements(JSON.parse(data));
+  });
+};</code></pre>
+                </div>
+
+                <!-- Payment Verification -->
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <h3 class="text-xl font-semibold text-white mb-4">
+                    Payment Verification Process
+                  </h3>
+
+                  <h4 class="font-medium text-white mb-3">
+                    x402 Facilitator API
+                  </h4>
+                  <div class="space-y-3 text-sm text-white/70">
+                    <div>
+                      <span class="text-violet-400">Endpoint:</span>
+                      https://x402-facilitator-a02bb8e9e6b3.herokuapp.com/verify
+                    </div>
+                    <div>
+                      <span class="text-violet-400">Method:</span> POST with
+                      JSON payload
+                    </div>
+                    <div>
+                      <span class="text-violet-400">Response:</span> Transaction
+                      hash or error
+                    </div>
+                    <div>
+                      <span class="text-violet-400">Timeout:</span> 30 seconds
+                      maximum
+                    </div>
+                  </div>
+
+                  <h4 class="font-medium text-white mb-3 mt-4">
+                    Verification Steps
+                  </h4>
+                  <div class="space-y-3 text-sm text-white/70">
+                    <div class="flex items-start gap-3">
+                      <span class="text-emerald-400 font-mono">1.</span>
+                      <span
+                        >ESP32 receives payment payload from app via Bluetooth
+                        (BLE)</span
+                      >
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-emerald-400 font-mono">2.</span>
+                      <span
+                        >Device validates payload format and required
+                        fields</span
+                      >
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-emerald-400 font-mono">3.</span>
+                      <span
+                        >ESP32 sends HTTPS POST to x402 facilitator API over
+                        WiFi</span
+                      >
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-emerald-400 font-mono">4.</span>
+                      <span
+                        >Facilitator validates signature and submits transaction
+                        to blockchain</span
+                      >
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-emerald-400 font-mono">5.</span>
+                      <span>Facilitator returns transaction hash to ESP32</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-emerald-400 font-mono">6.</span>
+                      <span
+                        >ESP32 executes payment callback (e.g., dispense
+                        coffee)</span
+                      >
+                    </div>
+                  </div>
+
+                  <h4 class="font-medium text-white mb-3 mt-4">
+                    Code Example: Payment Verification
+                  </h4>
+                  <pre
+                    class="rounded-lg bg-black/50 p-3 text-xs text-white/80 overflow-x-auto"
+                  ><code>bool verifyPayment(const PaymentPayload &decodedSignedPayload, const String &paymentRequirements, const String &customHeaders) {
+  // Make API call using utility function
+  HttpResponse response = makePaymentApiCall("verify", decodedSignedPayload, paymentRequirements, customHeaders);
+  
+  if (response.success && response.statusCode > 0) {
+    // Parse response manually for transaction hash
+    String txHash = extractJsonValue(response.body, "transactionHash");
+    if (txHash.length() > 0) {
+      Serial.println("Payment verified: " + txHash);
+      return true;
+    }
+  }
+  
+  return false;
+}</code></pre>
+                </div>
+
+                <!-- Security Considerations -->
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <h3 class="text-xl font-semibold text-white mb-4">
+                    Security & Privacy
+                  </h3>
+
+                  <div class="grid gap-4 lg:grid-cols-2">
+                    <div>
+                      <h4 class="font-medium text-white mb-2">
+                        Mobile App Security
+                      </h4>
+                      <div class="space-y-2 text-sm text-white/70">
+                        <div>
+                          <span class="text-red-400">•</span> Private keys
+                          encrypted with PIN
+                        </div>
+                        <div>
+                          <span class="text-red-400">•</span> Biometric
+                          authentication support
+                        </div>
+                        <div>
+                          <span class="text-red-400">•</span> Secure element
+                          storage (Android)
+                        </div>
+                        <div>
+                          <span class="text-red-400">•</span> Transaction
+                          signing happens locally
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 class="font-medium text-white mb-2">
+                        ESP32 Security
+                      </h4>
+                      <div class="space-y-2 text-sm text-white/70">
+                        <div>
+                          <span class="text-yellow-400">•</span> No private keys
+                          stored on device
+                        </div>
+                        <div>
+                          <span class="text-yellow-400">•</span> Payment
+                          verification via external API
+                        </div>
+                        <div>
+                          <span class="text-yellow-400">•</span> WiFi
+                          credentials in encrypted flash
+                        </div>
+                        <div>
+                          <span class="text-yellow-400">•</span> Bluetooth (BLE)
+                          pairing not required
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <h4 class="font-medium text-white mb-2 mt-4">Data Privacy</h4>
+                  <div class="space-y-2 text-sm text-white/70">
+                    <div>
+                      <span class="text-green-400">•</span> No personal
+                      information stored on ESP32
+                    </div>
+                    <div>
+                      <span class="text-green-400">•</span> Payment amounts and
+                      addresses are public (blockchain)
+                    </div>
+                    <div>
+                      <span class="text-green-400">•</span> Bluetooth (BLE)
+                      connections are not logged
+                    </div>
+                    <div>
+                      <span class="text-green-400">•</span> Device can operate
+                      without internet (offline mode)
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Supported Networks -->
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <h3 class="text-xl font-semibold text-white mb-4">
+                    Supported Blockchain Networks
+                  </h3>
+
+                  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div class="space-y-2">
+                      <h4 class="font-medium text-white">Mainnet Networks</h4>
+                      <div class="space-y-1 text-sm text-white/70">
+                        <div>
+                          <span class="text-blue-400">•</span> Base (base)
+                        </div>
+                        <div>
+                          <span class="text-purple-400">•</span> Polygon
+                          (polygon)
+                        </div>
+                        <div>
+                          <span class="text-red-400">•</span> Avalanche
+                          (avalanche)
+                        </div>
+                        <div>
+                          <span class="text-cyan-400">•</span> IoTeX (iotex)
+                        </div>
+                        <div>
+                          <span class="text-orange-400">•</span> Sei (sei)
+                        </div>
+                        <div>
+                          <span class="text-green-400">•</span> Peaq (peaq)
+                        </div>
+                      </div>
+                    </div>
+                    <div class="space-y-2">
+                      <h4 class="font-medium text-white">Testnet Networks</h4>
+                      <div class="space-y-1 text-sm text-white/70">
+                        <div>
+                          <span class="text-blue-400">•</span> Base Sepolia
+                          (base-sepolia)
+                        </div>
+                        <div>
+                          <span class="text-purple-400">•</span> Polygon Mumbai
+                          (polygon-mumbai)
+                        </div>
+                        <div>
+                          <span class="text-red-400">•</span> Avalanche Fuji
+                          (avalanche-fuji)
+                        </div>
+                        <div>
+                          <span class="text-cyan-400">•</span> IoTeX Testnet
+                          (iotex-testnet)
+                        </div>
+                      </div>
+                    </div>
+                    <div class="space-y-2">
+                      <h4 class="font-medium text-white">Token Support</h4>
+                      <div class="space-y-1 text-sm text-white/70">
+                        <div>
+                          <span class="text-emerald-400">•</span> USDC (primary)
+                        </div>
+                        <div>
+                          <span class="text-blue-400">•</span> Native gas tokens
+                        </div>
+                        <div>
+                          <span class="text-gray-400">•</span> Custom ERC-20
+                          tokens
+                        </div>
+                        <div>
+                          <span class="text-violet-400">•</span> Micro-amounts
+                          (1 wei precision)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Performance Metrics -->
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <h3 class="text-xl font-semibold text-white mb-4">
+                    Performance Metrics
+                  </h3>
+
+                  <div class="grid gap-4 lg:grid-cols-2">
+                    <div>
+                      <h4 class="font-medium text-white mb-2">
+                        Connection Times
+                      </h4>
+                      <div class="space-y-2 text-sm text-white/70">
+                        <div>
+                          <span class="text-cyan-400">BLE Discovery:</span> 1-3
+                          seconds
+                        </div>
+                        <div>
+                          <span class="text-cyan-400">GATT Connection:</span>
+                          0.5-2 seconds
+                        </div>
+                        <div>
+                          <span class="text-cyan-400">Service Discovery:</span>
+                          0.5-1 seconds
+                        </div>
+                        <div>
+                          <span class="text-cyan-400">Total Connect Time:</span>
+                          2-6 seconds
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 class="font-medium text-white mb-2">
+                        Payment Processing
+                      </h4>
+                      <div class="space-y-2 text-sm text-white/70">
+                        <div>
+                          <span class="text-emerald-400">Data Transfer:</span>
+                          100-500ms
+                        </div>
+                        <div>
+                          <span class="text-emerald-400"
+                            >API Verification:</span
+                          >
+                          2-10 seconds
+                        </div>
+                        <div>
+                          <span class="text-emerald-400"
+                            >Blockchain Confirm:</span
+                          >
+                          5-60 seconds
+                        </div>
+                        <div>
+                          <span class="text-emerald-400">Total Payment:</span>
+                          10-70 seconds
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <h4 class="font-medium text-white mb-2 mt-4">
+                    Throughput Limits
+                  </h4>
+                  <div class="space-y-2 text-sm text-white/70">
+                    <div>
+                      <span class="text-violet-400"
+                        >Concurrent Connections:</span
+                      >
+                      1 per ESP32 (BLE limitation)
+                    </div>
+                    <div>
+                      <span class="text-violet-400">Payments per Hour:</span>
+                      ~60 (limited by API rate limits)
+                    </div>
+                    <div>
+                      <span class="text-violet-400">Data Rate:</span> ~10KB/s
+                      over Bluetooth (BLE)
+                    </div>
+                    <div>
+                      <span class="text-violet-400">Range:</span> 10 meters
+                      line-of-sight
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Bluetooth Protocol and Data Transfer Details -->
+        <section id="ble-protocol" class="relative border-t border-white/10">
+          <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24">
+            <div class="max-w-4xl">
+              <h2 class="text-3xl sm:text-4xl font-semibold tracking-tight">
+                Bluetooth (BLE) Protocol Details
+              </h2>
+              <p class="text-white/70 mt-3 text-lg">
+                Complete technical documentation for the BLE communication
+                protocol implementation.
+              </p>
+
+              <!-- Bluetooth Protocol Details -->
+              <div class="mt-8 space-y-6">
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <h3 class="text-xl font-semibold text-white mb-4">
+                    Bluetooth (BLE) Protocol
+                  </h3>
+                  <div class="grid gap-4 lg:grid-cols-2">
+                    <div>
+                      <h4 class="font-medium text-white mb-2">
+                        Service & Characteristics
+                      </h4>
+                      <div class="space-y-2 text-sm text-white/70 font-mono">
+                        <div>
+                          <span class="text-cyan-400">Service UUID:</span>
+                          6e400002-b5a3-f393-e0a9-e50e24dcca9e
+                        </div>
+                        <div>
+                          <span class="text-cyan-400">TX Characteristic:</span>
+                          6e400003-b5a3-f393-e0a9-e50e24dcca9e
+                        </div>
+                        <div>
+                          <span class="text-cyan-400">RX Characteristic:</span>
+                          6e400004-b5a3-f393-e0a9-e50e24dcca9e
+                        </div>
+                        <div>
+                          <span class="text-cyan-400">Protocol:</span> Nordic
+                          UART Service (NUS)
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 class="font-medium text-white mb-2">
+                        Connection Parameters
+                      </h4>
+                      <div class="space-y-2 text-sm text-white/70">
+                        <div>
+                          <span class="text-emerald-400">MTU Size:</span> 150
+                          bytes (set in code)
+                        </div>
+                        <div>
+                          <span class="text-emerald-400"
+                            >Connection Interval:</span
+                          >
+                          7.5ms - 4000ms
+                        </div>
+                        <div>
+                          <span class="text-emerald-400"
+                            >Advertising Interval:</span
+                          >
+                          100ms
+                        </div>
+                        <div>
+                          <span class="text-emerald-400">Range:</span> ~10
+                          meters (Class 2)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Data Transfer Protocol -->
+                <div class="rounded-2xl border border-white/15 bg-white/5 p-6">
+                  <h3 class="text-xl font-semibold text-white mb-4">
+                    Data Transfer Protocol
+                  </h3>
+
+                  <h4 class="font-medium text-white mb-3">
+                    1. Device Advertisement
+                  </h4>
+                  <p class="text-sm text-white/70 mb-3">
+                    ESP32 advertises with device name containing payment info:
+                  </p>
+                  <pre
+                    class="rounded-lg bg-black/50 p-3 text-xs text-white/80 mb-4 overflow-x-auto"
+                  ><code>Device Name Format: "x402-[DEVICE_NAME]"
+Advertisement Data: Service UUID + Device Name
+Scan Response: Additional device info if needed</code></pre>
+
+                  <h4 class="font-medium text-white mb-3">
+                    2. Connection Handshake
+                  </h4>
+                  <div class="space-y-3 text-sm text-white/70">
+                    <div class="flex items-start gap-3">
+                      <span class="text-cyan-400 font-mono">APP:</span>
+                      <span
+                        >Scans for devices with Nordic UART service UUID</span
+                      >
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-cyan-400 font-mono">APP:</span>
+                      <span>Connects to device via GATT</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-cyan-400 font-mono">APP:</span>
+                      <span>Discovers services and characteristics</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-cyan-400 font-mono">APP:</span>
+                      <span
+                        >Subscribes to TX characteristic for notifications</span
+                      >
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-emerald-400 font-mono">ESP32:</span>
+                      <span
+                        >Sends payment requirements JSON via TX
+                        characteristic</span
+                      >
+                    </div>
+                  </div>
+
+                  <h4 class="font-medium text-white mb-3 mt-6">
+                    3. Payment Requirements JSON
+                  </h4>
+                  <pre
+                    class="rounded-lg bg-black/50 p-3 text-xs text-white/80 mb-4 overflow-x-auto"
+                  ><code>{
+  "network": "base-sepolia",
+  "payTo": "0xa78eD39F695615315458Bb066ac9a5F28Dfd65FE",
+  "maxAmountRequired": "1000000",
+  "logoURL": "https://example.com/logo.jpg",
+  "description": "Coffee machine payment",
+  "options": ["Espresso", "Americano", "Latte"],
+  "dynamicPricing": true,
+  "recurring": {
+    "enabled": true,
+    "intervalSeconds": 30
+  }
+}</code></pre>
+
+                  <h4 class="font-medium text-white mb-3">
+                    4. Payment Response
+                  </h4>
+                  <div class="space-y-3 text-sm text-white/70">
+                    <div class="flex items-start gap-3">
+                      <span class="text-cyan-400 font-mono">APP:</span>
+                      <span
+                        >User selects options and confirms payment in
+                        wallet</span
+                      >
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-cyan-400 font-mono">APP:</span>
+                      <span
+                        >Signs transaction with private key
+                        (PIN-protected)</span
+                      >
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-cyan-400 font-mono">APP:</span>
+                      <span
+                        >Sends payment payload JSON via RX characteristic</span
+                      >
+                    </div>
+                  </div>
+
+                  <h4 class="font-medium text-white mb-3 mt-6">
+                    5. Payment Payload JSON
+                  </h4>
+                  <pre
+                    class="rounded-lg bg-black/50 p-3 text-xs text-white/80 mb-4 overflow-x-auto"
+                  ><code>{
+  "network": "base-sepolia",
+  "from": "0x742d35Cc6C3C0532925a3b8D345A2E5E0E2F",
+  "to": "0xa78eD39F695615315458Bb066ac9a5F28Dfd65FE",
+  "amount": "1500000",
+  "signature": "0x1c2b4d...",
+  "nonce": 42,
+  "selectedOptions": ["Latte"],
+  "timestamp": 1729814400
+}</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq" class="relative border-t border-white/10">
+          <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24">
+            <div class="max-w-3xl">
+              <h2 class="text-3xl sm:text-4xl font-semibold tracking-tight">
+                FAQ
+              </h2>
+              <div
+                class="mt-6 divide-y divide-white/10 border-y border-white/10"
+              >
+                <details class="group py-5">
+                  <summary
+                    class="flex cursor-pointer list-none items-center justify-between"
+                  >
+                    <span class="font-medium">What is x402?</span>
+                    <span class="transition group-open:rotate-45">+</span>
+                  </summary>
+                  <p class="mt-3 text-white/70">
+                    A micropayment protocol using BLE Nordic UART service for
+                    device-to-mobile communication. Includes payment
+                    verification, settlement, and supports features like
+                    recurring payments and dynamic pricing.
+                  </p>
+                </details>
+                <details class="group py-5">
+                  <summary
+                    class="flex cursor-pointer list-none items-center justify-between"
+                  >
+                    <span class="font-medium">What chains are supported?</span>
+                    <span class="transition group-open:rotate-45">+</span>
+                  </summary>
+                  <p class="mt-3 text-white/70">
+                    Base (mainnet) and Base Sepolia for testing, plus Polygon,
+                    Avalanche, IoTeX, Sei, and Peaq networks. All with native
+                    USDC support.
+                  </p>
+                </details>
+                <details class="group py-5">
+                  <summary
+                    class="flex cursor-pointer list-none items-center justify-between"
+                  >
+                    <span class="font-medium">Does it work offline?</span>
+                    <span class="transition group-open:rotate-45">+</span>
+                  </summary>
+                  <p class="mt-3 text-white/70">
+                    Yes—device discovery, configuration, and payment signing are
+                    offline via BLE. The mobile app sends transactions offline
+                    Devices verify & settle payments via x4pay.org facilitator
+                    API.
+                  </p>
+                </details>
+                <details class="group py-5">
+                  <summary
+                    class="flex cursor-pointer list-none items-center justify-between"
+                  >
+                    <span class="font-medium"
+                      >What advanced features are supported?</span
+                    >
+                    <span class="transition group-open:rotate-45">+</span>
+                  </summary>
+                  <p class="mt-3 text-white/70">
+                    Recurring payments, dynamic pricing based on user
+                    selections, custom content/messages, multiple payment
+                    options per device, logo/banner/description display, and
+                    comprehensive memory management for embedded systems.
+                  </p>
+                </details>
+                <details class="group py-5">
+                  <summary
+                    class="flex cursor-pointer list-none items-center justify-between"
+                  >
+                    <span class="font-medium"
+                      >How secure is the mobile wallet?</span
+                    >
+                    <span class="transition group-open:rotate-45">+</span>
+                  </summary>
+                  <p class="mt-3 text-white/70">
+                    Uses PIN-based local encryption for private keys, supports
+                    multiple wallets, encrypted storage with AsyncStorage, and
+                    all signing happens locally on-device. No private keys are
+                    transmitted.
+                  </p>
+                </details>
+                <details class="group py-5">
+                  <summary
+                    class="flex cursor-pointer list-none items-center justify-between"
+                  >
+                    <span class="font-medium"
+                      >Which browsers support Web Bluetooth?</span
+                    >
+                    <span class="transition group-open:rotate-45">+</span>
+                  </summary>
+                  <p class="mt-3 text-white/70">
+                    Chrome, Edge, and other Chromium-based browsers support Web
+                    Bluetooth API. The React web app uses RainbowKit for wallet
+                    connection and Wagmi for blockchain interactions, providing
+                    a seamless desktop experience.
+                  </p>
+                </details>
+                <details class="group py-5">
+                  <summary
+                    class="flex cursor-pointer list-none items-center justify-between"
+                  >
+                    <span class="font-medium"
+                      >How difficult are these DIY projects?</span
+                    >
+                    <span class="transition group-open:rotate-45">+</span>
+                  </summary>
+                  <p class="mt-3 text-white/70">
+                    Projects range from beginner (LED control) to advanced
+                    (motor control, safety systems). All use the same X402
+                    payment libraries. Start with simple relay control projects
+                    like coffee machines before attempting complex systems like
+                    EV chargers.
+                  </p>
+                </details>
+                <details class="group py-5">
+                  <summary
+                    class="flex cursor-pointer list-none items-center justify-between"
+                  >
+                    <span class="font-medium"
+                      >What's the typical cost to build a DIY payment
+                      device?</span
+                    >
+                    <span class="transition group-open:rotate-45">+</span>
+                  </summary>
+                  <p class="mt-3 text-white/70">
+                    Hardware costs range from $15-50. ESP32 boards cost ~$6,
+                    sensors and relays cost $5-15. The X402 Arduino libraries
+                    are free.
+                  </p>
+                </details>
+                <details class="group py-5">
+                  <summary
+                    class="flex cursor-pointer list-none items-center justify-between"
+                  >
+                    <span class="font-medium"
+                      >Are the tutorials and code examples free?</span
+                    >
+                    <span class="transition group-open:rotate-45">+</span>
+                  </summary>
+                  <p class="mt-3 text-white/70">
+                    Yes. All ESP32 code examples and tutorials are free. Install
+                    the X402 Arduino libraries and copy the provided code.
+                  </p>
+                </details>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer class="border-t border-white/10">
+        <div class="mx-auto max-w-7xl px-6 py-10">
+          <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <!-- Company -->
+            <div>
+              <h3 class="text-sm font-medium text-white mb-3">x4 Pay</h3>
+              <p class="text-xs text-white/60 mb-4">
+                Open source Bluetooth crypto payments for ESP32 devices
+              </p>
+              <div class="flex items-center gap-3">
+                <span
+                  title="GitHub — coming soon"
+                  class="text-white/40 cursor-not-allowed"
+                >
+                  <span class="sr-only">GitHub</span>
+                  <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                    />
+                  </svg>
+                </span>
+              </div>
+            </div>
+
+            <!-- Resources -->
+            <div>
+              <h3 class="text-sm font-medium text-white mb-3">Resources</h3>
+              <ul class="space-y-2 text-xs text-white/60">
+                <li>
+                  <span class="text-white/40">Documentation (Coming Soon)</span>
+                </li>
+                <li>
+                  <span class="text-white/40">DIY Tutorials (Coming Soon)</span>
+                </li>
+                <li>
+                  <span class="text-white/40"
+                    >Technical Specs (Coming Soon)</span
+                  >
+                </li>
+                <li>
+                  <span class="text-white/40">Source Code (Coming Soon)</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Downloads -->
+            <div>
+              <h3 class="text-sm font-medium text-white mb-3">Downloads</h3>
+              <ul class="space-y-2 text-xs text-white/60">
+                <li>
+                  <span class="text-white/40">Android APK (Coming Soon)</span>
+                </li>
+                <li>
+                  <span class="text-white/40">iOS App (Coming Soon)</span>
+                </li>
+                <li>
+                  <span class="text-white/40">Web App (Coming Soon)</span>
+                </li>
+                <li>
+                  <span class="text-white/40"
+                    >Arduino Libraries (Coming Soon)</span
+                  >
+                </li>
+              </ul>
+            </div>
+
+            <!-- Legal -->
+            <div>
+              <h3 class="text-sm font-medium text-white mb-3">Legal</h3>
+              <ul class="space-y-2 text-xs text-white/60">
+                <li>
+                  <span class="text-white/40"
+                    >Privacy Policy (Coming Soon)</span
+                  >
+                </li>
+                <li>
+                  <span class="text-white/40"
+                    >Terms of Service (Coming Soon)</span
+                  >
+                </li>
+                <li><span class="text-white/40">Open Source (MIT)</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div
+            class="mt-8 pt-6 border-t border-white/10 text-xs text-white/40 flex flex-col sm:flex-row items-center justify-between gap-4"
+          >
+            <p>
+              © <span id="year"></span> x4 Pay. All rights reserved. Built with
+              ❤️ for the crypto community.
+            </p>
+            <div class="flex items-center gap-4">
+              <span>ESP32 • Bluetooth • x402 • Base Network</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+      // year
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      // mobile menu
+      const menuBtn = document.getElementById("menuBtn");
+      const mobileMenu = document.getElementById("mobileMenu");
+      menuBtn?.addEventListener("click", () => {
+        mobileMenu.classList.toggle("hidden");
+      });
+
+      // tabs
+      const tabBtns = document.querySelectorAll(".tab-btn");
+      const panels = document.querySelectorAll(".tab-panel");
+      tabBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const key = btn.getAttribute("data-tab");
+          tabBtns.forEach((b) => b.classList.remove("bg-white/10"));
+          btn.classList.add("bg-white/10");
+          panels.forEach((p) => {
+            p.classList.toggle("hidden", p.getAttribute("data-panel") !== key);
+          });
+        });
+      });
+
+      // copy buttons
+      document.querySelectorAll(".copy-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const target = btn.getAttribute("data-copy-target");
+          const code = document.querySelector(target)?.textContent ?? "";
+          try {
+            await navigator.clipboard.writeText(code);
+            btn.textContent = "Copied";
+            setTimeout(() => (btn.textContent = "Copy"), 1200);
+          } catch (e) {
+            // Fallback for browsers without clipboard API
+            console.log("Copy failed:", e);
+            btn.textContent = "Copy failed";
+            setTimeout(() => (btn.textContent = "Copy"), 1200);
+          }
+        });
+      });
+
+      // simple fade‑in on view
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add("opacity-100", "translate-y-0");
+              io.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.08 }
+      );
+      document.querySelectorAll("[data-reveal]").forEach((el) => {
+        el.classList.add(
+          "opacity-0",
+          "translate-y-2",
+          "transition",
+          "duration-700"
+        );
+        io.observe(el);
+      });
+
+      // Countdown Timer
+      function updateCountdown() {
+        // Target date: October 26, 2025 at 12:00 PM (noon)
+        const targetDate = new Date("2025-10-26T12:00:00").getTime();
+        const now = new Date().getTime();
+        const difference = targetDate - now;
+
+        if (difference > 0) {
+          const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+          const hours = Math.floor(
+            (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+          );
+          const minutes = Math.floor(
+            (difference % (1000 * 60 * 60)) / (1000 * 60)
+          );
+          const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+          document.getElementById("days").textContent = days
+            .toString()
+            .padStart(2, "0");
+          document.getElementById("hours").textContent = hours
+            .toString()
+            .padStart(2, "0");
+          document.getElementById("minutes").textContent = minutes
+            .toString()
+            .padStart(2, "0");
+          document.getElementById("seconds").textContent = seconds
+            .toString()
+            .padStart(2, "0");
+        } else {
+          // Countdown has ended
+          document.getElementById("days").textContent = "00";
+          document.getElementById("hours").textContent = "00";
+          document.getElementById("minutes").textContent = "00";
+          document.getElementById("seconds").textContent = "00";
+
+          // Optional: Hide countdown or show a message
+          const countdownElement = document.getElementById("countdown");
+          if (countdownElement && countdownElement.parentElement) {
+            countdownElement.parentElement.innerHTML =
+              '<div class="text-center"><p class="text-lg font-semibold text-emerald-400">🎉 Launch Time!</p><p class="text-sm text-white/70 mt-2">The countdown has ended</p></div>';
+          }
+        }
+      }
+
+      // Update countdown immediately and then every second
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    </script>
+  </body>
 </html>
