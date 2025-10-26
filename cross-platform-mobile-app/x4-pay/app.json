@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "my-expo-app",
+    "slug": "my-expo-app",
+    "scheme": "your-app-scheme",
+    "version": "1.0.0",
+    "web": {
+      "favicon": "./assets/logo.png"
+    },
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "This app uses Bluetooth to connect to nearby devices.",
+        "NSBluetoothPeripheralUsageDescription": "This app uses Bluetooth to communicate with peripherals.",
+        "UIBackgroundModes": [
+          "bluetooth-central"
+        ]
+      },
+      "bundleIdentifier": "com.abhinavraj77k.x4pay"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.abhinavraj77k.x4pay"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "51443cc0-3714-4cad-a897-686fd75b0f46"
+      }
+    }
+  }
+}

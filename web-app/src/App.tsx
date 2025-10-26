@@ -2,16 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import { RX_CHAR_UUID, SERVICE_UUID, TX_CHAR_UUID } from "./constants";
 import DeviceWindow from "./components/DeviceWindow";
 import RecurringDialog from "./components/RecurringDialog";
+import Header from "./components/Header";
 import type { GattRefs, PaymentRequirements } from "./types";
 import {
   buildPaymentRequirements,
   createPaymentPayload,
 } from "./utils/x402-utils";
-import { useWalletClient } from "wagmi";
+import { useWalletClient, useAccount } from "wagmi";
 import { chunkString } from "./utils/communication-utils";
 
 function App() {
   const { data: walletClient } = useWalletClient();
+  const { address } = useAccount();
 
   const [activeWindow, setActiveWindow] = useState<"home" | "device">("home");
   const [connected, setConnected] = useState(false);
@@ -32,6 +34,8 @@ function App() {
     useState<string>("");
 
   const g = useRef<GattRefs>({});
+
+  const [scanning, setScanning] = useState(false);
 
   // DONE in movile
   const onNotification = (event: any) => {
@@ -169,11 +173,13 @@ function App() {
 
   // DONE in movile
   const handleScanClick = async () => {
+    setScanning(true);
     try {
       if (!navigator.bluetooth) {
         alert("Web Bluetooth API is not available in this browser.");
         return;
       }
+
       const device = await navigator.bluetooth.requestDevice({
         filters: [{ services: [SERVICE_UUID] }],
         optionalServices: [SERVICE_UUID],
@@ -198,6 +204,8 @@ function App() {
       setActiveWindow("device");
     } catch (error) {
       console.error("Error during Bluetooth scan:", error);
+    } finally {
+      setScanning(false);
     }
   };
 
@@ -250,13 +258,20 @@ function App() {
         />
         {showRecurringDialog && paymentRequirements && frequency && (
           <RecurringDialog
+            address={address || '0x0000000000000000000000000000000000000000'}
             frequency={parseInt(frequency)}
             price={paymentRequirements.maxAmountRequired}
             userActiveContext={userActiveCContext}
             userActiveOptions={userActiveOptions}
             lastSuccessfullTransaction={lastSuccessfullTransaction}
-            handlePay={handlePayNow}
+            handlePay={(addr, options, context, _privateKey) => {
+              // For web version, we don't use the privateKey parameter
+              // as wallet signing is handled differently
+              handlePayNow(addr, options, context);
+            }}
             onCancel={() => setShowRecurringDialog(false)}
+            sessionId="web-session"
+            privateKey="web-placeholder"
           />
         )}
       </>
@@ -264,16 +279,91 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4">
-      <div className="text-center space-y-8 max-w-md w-full">
-        <h1 className="text-4xl font-bold text-white mb-2">BluePay</h1>
-        <p className="text-blue-400 text-sm mb-8">Connect to device</p>
-        <button
-          onClick={handleScanClick}
-          className="w-24 h-24 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-full flex items-center justify-center text-white text-lg font-semibold transition-colors mx-auto"
-        >
-          SCAN
-        </button>
+    <div className="min-h-screen bg-black flex flex-col">
+      {/* Header */}
+      <Header onSettingsPress={() => {}} />
+
+      {/* Main content */}
+      <div className="mx-auto w-full max-w-md px-4 py-8">
+        <div className="bg-white/4 border border-white/12 rounded-3xl p-6 backdrop-blur-xl">
+          <div className="mb-6 items-center text-center">
+            <div className="bg-white/8 mb-4 h-16 w-16 mx-auto flex items-center justify-center rounded-2xl">
+              <img
+                src="/logo.png"
+                alt="Logo"
+                className="w-12 h-12 rounded-xl"
+              />
+            </div>
+            <h2 className="text-xl font-semibold text-white">Device Scanner</h2>
+            <p className="max-w-sm mx-auto text-sm text-white/60 mt-2">
+              Discover and connect to nearby x4 Cores
+            </p>
+          </div>
+
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div
+                className={`h-3 w-3 rounded-full ${
+                  connected ? "bg-white/80" : "bg-white/30"
+                }`}
+              ></div>
+              <div className="text-base font-medium text-white">
+                {connected ? "Connected" : "Ready to scan"}
+              </div>
+            </div>
+
+            <button
+              onClick={handleScanClick}
+              disabled={scanning}
+              className={`flex items-center gap-3 rounded-2xl px-4 py-2.5 transition-all duration-150 ${
+                scanning
+                  ? "border border-white/10 bg-white/5 text-white/60"
+                  : "border border-white/15 bg-black text-white"
+              }`}
+            >
+              <div
+                className={`${
+                  scanning ? "animate-spin" : ""
+                } w-4 h-4 flex items-center justify-center`}
+              >
+                <span className="text-white text-sm">⊕</span>
+              </div>
+              <div className={`text-sm font-semibold`}>
+                {scanning ? "Scanning..." : "Scan Devices"}
+              </div>
+            </button>
+          </div>
+
+          <div className="pt-4">
+            <div className="items-center justify-center py-12 text-center">
+              {scanning ? (
+                <>
+                  <div className="mb-4 h-12 w-12 rounded-full border-2 border-white/20 border-t-white mx-auto animate-spin" />
+                  <div className="text-base font-medium text-white">
+                    Scanning for devices...
+                  </div>
+                  <div className="max-w-sm mx-auto text-sm text-white/50 mt-2">
+                    Looking for nearby payment devices. Devices are not shown
+                    automatically—use the Scan button to pick one.
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="mb-4 h-12 w-12 flex items-center justify-center rounded-full bg-white/10 mx-auto">
+                    <span className="text-lg text-white/60">◯</span>
+                  </div>
+                  <div className="text-base font-medium text-white">
+                    No devices nearby
+                  </div>
+                  <div className="max-w-sm mx-auto text-sm text-white/50 mt-2">
+                    Make sure your device is discoverable and press Scan to
+                    connect.
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

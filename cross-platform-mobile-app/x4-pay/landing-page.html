@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>x4 Pay - Crypto over Bluetooth for Embedded Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['-apple-system', 'BlinkMacSystemFont', 'San Francisco', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
+                    colors: {
+                        'apple-gray': {
+                            50: '#f9fafb',
+                            100: '#f3f4f6',
+                            200: '#e5e7eb',
+                            300: '#d1d5db',
+                            400: '#9ca3af',
+                            500: '#6b7280',
+                            600: '#4b5563',
+                            700: '#374151',
+                            800: '#1f2937',
+                            900: '#111827',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .feature-card {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .hero-image {
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        }
+    </style>
+</head>
+<body class="bg-black text-white font-sans">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <img src="assets/banner.png" alt="x4 Pay" style="height: 28px; object-fit: contain;" />
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#features" class="text-white/60 hover:text-white px-3 py-2 text-sm font-medium transition-colors">Features</a>
+                        <a href="#how-it-works" class="text-white/60 hover:text-white px-3 py-2 text-sm font-medium transition-colors">How it Works</a>
+                        <a href="#download" class="text-white/60 hover:text-white px-3 py-2 text-sm font-medium transition-colors">Download</a>
+                        <a href="#github" class="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-white/90 transition-colors">GitHub</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div class="hero-image absolute inset-0"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-5xl md:text-7xl font-light tracking-tight mb-8">
+                    <span class="text-gradient">Crypto Payments</span><br>
+                    <span class="text-white">over Bluetooth</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-white/60 mb-12 font-light leading-relaxed max-w-3xl mx-auto">
+                    Revolutionary mobile wallet enabling seamless USDC transactions with embedded systems through Bluetooth connectivity. No internet required.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <button class="bg-white text-black px-8 py-4 rounded-full text-lg font-medium hover:bg-white/90 transition-all transform hover:scale-105">
+                        Download App
+                    </button>
+                    <button class="border border-white/20 text-white px-8 py-4 rounded-full text-lg font-medium hover:bg-white/10 transition-all">
+                        View Demo
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Floating Phone Mockup -->
+        <div class="absolute right-10 top-1/2 transform -translate-y-1/2 hidden lg:block">
+            <div class="w-64 h-[520px] bg-black rounded-[3rem] p-4 border border-white/20 shadow-2xl">
+                <div class="w-full h-full bg-gradient-to-b from-black to-gray-900 rounded-[2.5rem] flex flex-col">
+                    <!-- Phone Status Bar -->
+                    <div class="flex justify-between items-center px-6 py-3 text-white text-xs">
+                        <span class="font-medium">x4 Pay</span>
+                        <span>●●●</span>
+                    </div>
+                    <!-- Phone Content -->
+                    <div class="flex-1 px-6 py-4">
+                        <div class="text-center mb-8">
+                            <div class="text-sm text-white/60 mb-2">Total Balance</div>
+                            <div class="text-3xl font-light text-white">$1,234.56</div>
+                            <div class="text-sm text-white/60">USDC</div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-white/10 rounded-2xl p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-white/20 rounded-full"></div>
+                                    <div>
+                                        <div class="text-white text-sm font-medium">Connected Device</div>
+                                        <div class="text-white/60 text-xs">Ready to pay</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <button class="flex-1 bg-white text-black py-3 rounded-xl text-sm font-medium">Send</button>
+                                <button class="flex-1 bg-white/10 text-white py-3 rounded-xl text-sm font-medium">Receive</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-24 bg-black">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl font-light tracking-tight mb-6 text-white">
+                    Built for the Future
+                </h2>
+                <p class="text-xl text-white/60 max-w-3xl mx-auto font-light">
+                    Seamlessly bridge the gap between traditional embedded systems and modern cryptocurrency payments
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="feature-card rounded-3xl p-8 text-center">
+                    <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <span class="text-2xl">📱</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4 text-white">Bluetooth Connectivity</h3>
+                    <p class="text-white/60 leading-relaxed">
+                        Connect to embedded systems instantly via Bluetooth. No internet connection required for transactions.
+                    </p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="feature-card rounded-3xl p-8 text-center">
+                    <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <span class="text-2xl">🔒</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4 text-white">Secure PIN Protection</h3>
+                    <p class="text-white/60 leading-relaxed">
+                        Advanced PIN encryption with custom keypad interface prevents keylogging and unauthorized access.
+                    </p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="feature-card rounded-3xl p-8 text-center">
+                    <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <span class="text-2xl">💰</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4 text-white">USDC on Base</h3>
+                    <p class="text-white/60 leading-relaxed">
+                        Native support for USDC transactions on Base and Base Sepolia networks with real-time balance tracking.
+                    </p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="feature-card rounded-3xl p-8 text-center">
+                    <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <span class="text-2xl">⚡</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4 text-white">Instant Payments</h3>
+                    <p class="text-white/60 leading-relaxed">
+                        Lightning-fast transaction processing with automatic verification and confirmation.
+                    </p>
+                </div>
+                
+                <!-- Feature 5 -->
+                <div class="feature-card rounded-3xl p-8 text-center">
+                    <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <span class="text-2xl">🔧</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4 text-white">DIY Integration</h3>
+                    <p class="text-white/60 leading-relaxed">
+                        Create your own x402 pay core for custom embedded system integration and development.
+                    </p>
+                </div>
+                
+                <!-- Feature 6 -->
+                <div class="feature-card rounded-3xl p-8 text-center">
+                    <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <span class="text-2xl">📊</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4 text-white">Multi-Account Support</h3>
+                    <p class="text-white/60 leading-relaxed">
+                        Manage multiple wallets, import existing accounts, and switch between different configurations seamlessly.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-24 bg-gradient-to-b from-black to-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl font-light tracking-tight mb-6 text-white">
+                    How it Works
+                </h2>
+                <p class="text-xl text-white/60 max-w-3xl mx-auto font-light">
+                    Simple three-step process to enable cryptocurrency payments on any embedded system
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-12">
+                <!-- Step 1 -->
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-white text-black rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl font-bold">
+                        1
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4 text-white">Connect</h3>
+                    <p class="text-white/60 text-lg leading-relaxed">
+                        Hold your phone near the embedded system or scan to establish a secure Bluetooth connection.
+                    </p>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-white text-black rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl font-bold">
+                        2
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4 text-white">Verify</h3>
+                    <p class="text-white/60 text-lg leading-relaxed">
+                        Enter your secure PIN using the custom keypad to authorize the transaction.
+                    </p>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-white text-black rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl font-bold">
+                        3
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4 text-white">Pay</h3>
+                    <p class="text-white/60 text-lg leading-relaxed">
+                        Complete the USDC transaction instantly with real-time confirmation and balance updates.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack Section -->
+    <section class="py-24 bg-black">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl font-light tracking-tight mb-6 text-white">
+                    Built with Modern Tech
+                </h2>
+                <p class="text-xl text-white/60 max-w-3xl mx-auto font-light">
+                    Leveraging cutting-edge technologies for optimal performance and security
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="feature-card rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-4">⚛️</div>
+                    <h4 class="text-white font-medium">React Native</h4>
+                    <p class="text-white/60 text-sm mt-2">Cross-platform mobile app</p>
+                </div>
+                <div class="feature-card rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-4">📘</div>
+                    <h4 class="text-white font-medium">TypeScript</h4>
+                    <p class="text-white/60 text-sm mt-2">Type-safe development</p>
+                </div>
+                <div class="feature-card rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-4">🔗</div>
+                    <h4 class="text-white font-medium">Viem</h4>
+                    <p class="text-white/60 text-sm mt-2">Ethereum integration</p>
+                </div>
+                <div class="feature-card rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-4">🎨</div>
+                    <h4 class="text-white font-medium">TailwindCSS</h4>
+                    <p class="text-white/60 text-sm mt-2">Apple-like design</p>
+                </div>
+                <div class="feature-card rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-4">📶</div>
+                    <h4 class="text-white font-medium">Bluetooth LE</h4>
+                    <p class="text-white/60 text-sm mt-2">Low-energy connectivity</p>
+                </div>
+                <div class="feature-card rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-4">🔐</div>
+                    <h4 class="text-white font-medium">CryptoJS</h4>
+                    <p class="text-white/60 text-sm mt-2">Encryption & security</p>
+                </div>
+                <div class="feature-card rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-4">🏗️</div>
+                    <h4 class="text-white font-medium">Expo</h4>
+                    <p class="text-white/60 text-sm mt-2">Development platform</p>
+                </div>
+                <div class="feature-card rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-4">🔵</div>
+                    <h4 class="text-white font-medium">Base Network</h4>
+                    <p class="text-white/60 text-sm mt-2">Layer 2 scaling</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="py-24 gradient-bg">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl md:text-5xl font-light tracking-tight mb-6 text-white">
+                Ready to Get Started?
+            </h2>
+            <p class="text-xl text-white/60 mb-12 font-light max-w-2xl mx-auto">
+                Download x4 Pay today and experience the future of embedded system payments
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
+                <button class="bg-white text-black px-8 py-4 rounded-full text-lg font-medium hover:bg-white/90 transition-all transform hover:scale-105 flex items-center gap-3">
+                    <span>📱</span>
+                    Download for iOS
+                </button>
+                <button class="bg-white text-black px-8 py-4 rounded-full text-lg font-medium hover:bg-white/90 transition-all transform hover:scale-105 flex items-center gap-3">
+                    <span>🤖</span>
+                    Download for Android
+                </button>
+            </div>
+            
+            <div class="flex justify-center">
+                <a href="#" class="text-white/60 hover:text-white transition-colors flex items-center gap-2">
+                    <span>📋</span>
+                    View on GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black border-t border-white/10 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-white">x4 Pay</h3>
+                    <p class="text-white/60 text-sm leading-relaxed">
+                        Revolutionizing payments for embedded systems through blockchain technology and Bluetooth connectivity.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-medium mb-4">Product</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Features</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">How it Works</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Security</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">API Documentation</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-medium mb-4">Developers</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">GitHub</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Documentation</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">DIY Guide</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Community</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-medium mb-4">Support</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Bug Reports</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Feature Requests</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-white/60 text-sm">
+                    © 2025 x4 Pay. All rights reserved.
+                </p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="text-white/60 hover:text-white transition-colors text-sm">Privacy Policy</a>
+                    <a href="#" class="text-white/60 hover:text-white transition-colors text-sm">Terms of Service</a>
+                    <a href="#" class="text-white/60 hover:text-white transition-colors text-sm">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Smooth Scrolling Script -->
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Mobile menu toggle (if you want to add mobile menu later)
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    </script>
+</body>
+</html>

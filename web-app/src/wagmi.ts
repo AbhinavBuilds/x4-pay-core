@@ -1,4 +1,5 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+//@ts-ignore
 import { base, baseSepolia } from 'wagmi/chains';
 
 export const config = getDefaultConfig({
